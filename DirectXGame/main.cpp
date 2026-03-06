@@ -70,7 +70,7 @@ void DrawScene() {
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	using namespace KamataEngine;
 	// エンジンの初期化
-	KamataEngine::Initialize(L" LE2C_12_サトウ_シオン_AL3");
+	KamataEngine::Initialize(L"TD3_L3 ");
 	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	
