@@ -19,8 +19,8 @@ struct MapChipData {
 class MapChipField {
 public:
 	struct IndexSet {
-		uint32_t xIndex;
-		uint32_t yIndex;
+		int32_t xIndex;
+		int32_t yIndex;
 	};
 
 	struct Rect {

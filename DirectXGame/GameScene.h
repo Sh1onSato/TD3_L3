@@ -5,7 +5,6 @@
 #include "Skydome.h"
 #include "MapChipField.h"
 #include "CameraController.h"
-#include "Enemy.h"
 #include "DeathParticles.h"
 #include "Fade.h"
 
@@ -54,14 +53,12 @@ private:
 	KamataEngine::Model* playerModel_ = nullptr;        // プレイヤーのモデル
 	KamataEngine::Model* blockModel_ = nullptr;         // ブロックのモデル
 	KamataEngine::Model* skydomeModel_ = nullptr;       // スカイドームのモデル
-	KamataEngine::Model* enemyModel_ = nullptr;         // 敵のモデル
 	KamataEngine::Model* deathParticleModel_ = nullptr; // 死亡エフェクトのモデル
 
 	// --- ゲームオブジェクト ---
 	Player* player_ = nullptr;          // 自キャラ
 	Skydome* skydome_ = nullptr;        // 背景の空
 	MapChipField* mapChipField_ = nullptr; // マップデータ
-	std::list<Enemy*> enemies_;         // 敵のリスト
 	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理
 
 	// --- カメラ・描画関連 ---
