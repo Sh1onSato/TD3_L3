@@ -95,24 +95,21 @@ private:
 	uint32_t textureHandle_ = 0u;                // テクスチャ
 
 	// --- 移動・ステータス ---
-	Vector3 velocity_ = {0, 0, 0};   // 現在の移動速度
+	Vector3 velocity_ = {0, 0, 0};   // 現在の移動速度（未使用：後方互換のため保持）
 	LRDirection lrDirection_ = LRDirection::kRight; // 向いている方向
 	bool onGround_ = true;           // 地面に足がついているか
 	bool isDead_ = false;            // 死亡フラグ
 	MapChipField* mapChipField_ = nullptr; // マップデータへの参照
 
-	// --- 演出・タイマー関連 ---
-	float turnFirstRotationY_ = 0.0f; // 旋回開始時の角度
-	float turnTimer_ = 0.0f;          // 旋回のアニメーション用タイマー
+	// --- マス移動アニメーション ---
+	bool isMoving_ = false;               // マス移動中か
+	Vector3 moveStartPosition_ = {};      // 移動開始位置
+	Vector3 moveTargetPosition_ = {};     // 移動目標位置（マスの中心）
+	float moveTimer_ = 0.0f;             // 移動アニメーションタイマー
 
 	// --- 定数（調整パラメータ） ---
-	static inline const float kAcceleration = 0.01f;      // 加速
-	static inline const float kAttenuation = 0.05f;       // 減速
-	static inline const float kLimitRunSpeed = 0.3f;      // 最大走行速度
+	static inline const float kMoveTime = 0.15f;          // 1マス移動にかかる時間（秒）
 	static inline const float kTimeTurn = 0.3f;           // 旋回にかかる時間
-	static inline const float kJumpAcceleration = 20.0f;  // ジャンプ力（初速）
-	static inline const float kGravityAcceleration = 0.98f; // 重力
-	static inline const float kLimitFallSpeed = 0.5f;     // 最大落下速度
 	static inline const float kWidth = 0.8f;              // キャラクターの横幅（判定用）
 	static inline const float kHeight = 0.8f;             // キャラクターの高さ（判定用）
 	static inline const float kBlank = 0.04f;             // 判定の遊び（少し小さくする）

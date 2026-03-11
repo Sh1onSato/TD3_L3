@@ -2,7 +2,6 @@
 
 #include "Player.h"
 #include <cassert>
-#include <numbers>
 #include <algorithm>
 #include "Math.h"
 #include "MapChipField.h"
@@ -31,18 +30,21 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
  */
 void Player::Update() { 
 	InputMove();
-	
-	CollisionMapInfo collisionMapInfo = {};
-	collisionMapInfo.move = velocity_; 
-	CheckMapCollision(collisionMapInfo);
 
-	worldTransform_.translation_ += collisionMapInfo.move;
+	// マス移動アニメーション
+	if (isMoving_) {
+		moveTimer_ += 1.0f / 60.0f;
+		float t = moveTimer_ / kMoveTime;
 
-	UpdateOnWall(collisionMapInfo);
-
-	if (turnTimer_ > 0.0f) {
-		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-		worldTransform_.rotation_.y = EaseInOut(1.0f - (turnTimer_ / kTimeTurn), turnFirstRotationY_, worldTransform_.rotation_.y);
+		if (t >= 1.0f) {
+			// 移動完了：目標マスの中心にスナップ
+			worldTransform_.translation_ = moveTargetPosition_;
+			isMoving_ = false;
+		} else {
+			// EaseInOut で滑らかに補間
+			worldTransform_.translation_.x = EaseInOut(t, moveStartPosition_.x, moveTargetPosition_.x);
+			worldTransform_.translation_.z = EaseInOut(t, moveStartPosition_.z, moveTargetPosition_.z);
+		}
 	}
 
 	WorldTransformUpdate(worldTransform_);
@@ -56,38 +58,50 @@ void Player::Draw() {
 }
 
 /**
- * @brief 移動入力の処理
+ * @brief 移動入力の処理（マス単位の移動）
  */
 void Player::InputMove() {
-	Vector3 acceleration = {};
-	
-	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
-		acceleration.x += kAcceleration;
-	} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
-		acceleration.x -= kAcceleration;
+	// 移動アニメーション中は新たな入力を受け付けない
+	if (isMoving_) return;
+
+	int32_t dx = 0, dz = 0;
+
+	if (Input::GetInstance()->TriggerKey(DIK_RIGHT)) {
+		dx = 1;
+	} else if (Input::GetInstance()->TriggerKey(DIK_LEFT)) {
+		dx = -1;
+	} else if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+		dz = -1; // yIndex を -1 する → worldZ = kBlockHeight*(kNumBlockVirtical-1-yIndex) が増加 → 前進(+Z)
+	} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+		dz = 1;  // yIndex を +1 する → worldZ が減少 → 後退(-Z)
 	}
 
-	if (Input::GetInstance()->PushKey(DIK_UP)) {
-		acceleration.z += kAcceleration;
-	} else if (Input::GetInstance()->PushKey(DIK_DOWN)) {
-		acceleration.z -= kAcceleration;
-	}
+	if (dx == 0 && dz == 0) return;
 
-	if (acceleration.x != 0.0f) velocity_.x += acceleration.x;
-	else velocity_.x *= (1.0f - kAttenuation);
+	// 現在のグリッドインデックスを取得
+	MapChipField::IndexSet currentIndex = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_);
 
-	if (acceleration.z != 0.0f) velocity_.z += acceleration.z;
-	else velocity_.z *= (1.0f - kAttenuation);
+	int32_t nextXIndex = static_cast<int32_t>(currentIndex.xIndex) + dx;
+	int32_t nextYIndex = static_cast<int32_t>(currentIndex.yIndex) + dz;
 
-	velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
-	velocity_.z = std::clamp(velocity_.z, -kLimitRunSpeed, kLimitRunSpeed);
+	// 範囲外チェック
+	if (nextXIndex < 0 || nextYIndex < 0) return;
 
-	if (std::abs(velocity_.x) <= 0.001f) velocity_.x = 0.0f;
-	if (std::abs(velocity_.z) <= 0.001f) velocity_.z = 0.0f;
+	// 移動先のマスが通行可能（kBlock）かチェック
+	MapChipType nextType = mapChipField_->GetMapChipTypeByIndex(
+	    static_cast<uint32_t>(nextXIndex), static_cast<uint32_t>(nextYIndex));
+	if (nextType != MapChipType::kBlock) return;
 
-	if (acceleration.x != 0.0f || acceleration.z != 0.0f) {
-		worldTransform_.rotation_.y = std::atan2(acceleration.x, acceleration.z);
-	}
+	// 移動アニメーションのセットアップ
+	moveStartPosition_ = worldTransform_.translation_;
+	moveTargetPosition_ = mapChipField_->GetMapChipPositionByIndex(
+	    static_cast<uint32_t>(nextXIndex), static_cast<uint32_t>(nextYIndex));
+	moveTargetPosition_.y = worldTransform_.translation_.y; // Y は固定
+	isMoving_ = true;
+	moveTimer_ = 0.0f;
+
+	// キャラクターを移動方向に向ける
+	worldTransform_.rotation_.y = std::atan2(static_cast<float>(dx), static_cast<float>(-dz));
 }
 
 /**
