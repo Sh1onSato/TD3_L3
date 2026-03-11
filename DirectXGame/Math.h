@@ -22,6 +22,10 @@ Vector3& operator-=(Vector3& lhs, const Vector3& rhv);
 Vector3& operator*=(Vector3& v, float s);
 Vector3& operator/=(Vector3& v, float s);
 
+// 2項演算子オーバーロード
+Vector3 operator+(const Vector3& v1, const Vector3& v2);
+Vector3 operator-(const Vector3& v1, const Vector3& v2);
+
 // 代入演算子オーバーロード
 Matrix4x4& operator*=(Matrix4x4& lhm, const Matrix4x4& rhm);
 
