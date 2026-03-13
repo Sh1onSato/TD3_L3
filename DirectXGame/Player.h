@@ -84,9 +84,6 @@ private:
 	/// @brief 壁接触状態の更新
 	void UpdateOnWall(const CollisionMapInfo& info);
 
-	/// @brief イージング関数（滑らかな移動用）
-	float EaseInOut(float t, float start, float end);
-
 private:
 	// --- 基本コンポーネント ---
 	KamataEngine::WorldTransform worldTransform_; // ワールド座標データ

@@ -41,9 +41,9 @@ void Player::Update() {
 			worldTransform_.translation_ = moveTargetPosition_;
 			isMoving_ = false;
 		} else {
-			// EaseInOut で滑らかに補間
-			worldTransform_.translation_.x = EaseInOut(t, moveStartPosition_.x, moveTargetPosition_.x);
-			worldTransform_.translation_.z = EaseInOut(t, moveStartPosition_.z, moveTargetPosition_.z);
+			// 線形補間（直線移動）
+			worldTransform_.translation_.x = moveStartPosition_.x + (moveTargetPosition_.x - moveStartPosition_.x) * t;
+			worldTransform_.translation_.z = moveStartPosition_.z + (moveTargetPosition_.z - moveStartPosition_.z) * t;
 		}
 	}
 
@@ -205,12 +205,6 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 		if (std::abs(info.move.x) < 0.001f) velocity_.x = 0.0f;
 		if (std::abs(info.move.z) < 0.001f) velocity_.z = 0.0f;
 	}
-}
-
-float Player::EaseInOut(float t, float start, float end) {
-	t = std::clamp(t, 0.0f, 1.0f);
-	float t_eased = t * t * (3.0f - 2.0f * t);
-	return start + (end - start) * t_eased;
 }
 
 Vector3 Player::GetWorldPosition() {
