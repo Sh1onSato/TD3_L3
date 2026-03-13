@@ -66,13 +66,13 @@ void Player::InputMove() {
 
 	int32_t dx = 0, dz = 0;
 
-	if (Input::GetInstance()->TriggerKey(DIK_RIGHT)) {
+	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
 		dx = 1;
-	} else if (Input::GetInstance()->TriggerKey(DIK_LEFT)) {
+	} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
 		dx = -1;
-	} else if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+	} else if (Input::GetInstance()->PushKey(DIK_UP)) {
 		dz = -1; // yIndex を -1 する → worldZ = kBlockHeight*(kNumBlockVirtical-1-yIndex) が増加 → 前進(+Z)
-	} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+	} else if (Input::GetInstance()->PushKey(DIK_DOWN)) {
 		dz = 1;  // yIndex を +1 する → worldZ が減少 → 後退(-Z)
 	}
 
