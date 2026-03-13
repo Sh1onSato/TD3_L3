@@ -61,8 +61,8 @@ void GameScene::Initialize() {
 	// --- 4. プレイヤーの生成と初期化 ---
 	player_ = new Player();
 	player_->SetMapChipField(mapChipField_);
-	// マップ上の初期位置（インデックス 0, 0）
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(0, 0);
+	// マップ上の初期位置（9×11の通行可能エリア中央付近：全4方向に移動できる位置）
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(5, 4);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 
 	// --- 5. 背景（スカイドーム）の初期化 ---
