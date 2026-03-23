@@ -87,6 +87,9 @@ private:
 	/// @brief イージング関数（滑らかな移動用）
 	float EaseInOut(float t, float start, float end);
 
+	// 直進移動の目標位置を取得
+	Vector3 GetSlideTargetPosition();
+
 private:
 	// --- 基本コンポーネント ---
 	KamataEngine::WorldTransform worldTransform_; // ワールド座標データ
@@ -100,6 +103,8 @@ private:
 	bool onGround_ = true;           // 地面に足がついているか
 	bool isDead_ = false;            // 死亡フラグ
 	MapChipField* mapChipField_ = nullptr; // マップデータへの参照
+
+	Vector3 moveDirection_ = {0, 0, 1};
 
 	// --- マス移動アニメーション ---
 	bool isMoving_ = false;               // マス移動中か
