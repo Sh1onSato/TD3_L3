@@ -54,6 +54,9 @@ public:
 	Vector3 GetWorldPosition();
 	bool IsDead() const { return isDead_; }
 
+
+	Vector3 GetMoveDirection() const { return moveDirection_; }
+
 private:
 	// --- 内部処理用関数 ---
 

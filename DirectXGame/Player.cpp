@@ -57,11 +57,11 @@ void Player::Draw() {
 	model_->Draw(worldTransform_, *camera_, textureHandle_); 
 }
 
-/**
+/**i
  * @brief 移動入力の処理（マス単位の移動）
  */
 void Player::InputMove() {
-	// 移動アニメーション中は新たな入力を受け付けない
+	//移動アニメーション中は入力を受け付けない
 	if (isMoving_) return;
 
 	int32_t dx = 0, dz = 0;
@@ -113,11 +113,11 @@ Vector3 Player::GetSlideTargetPosition() {
 
 	auto current = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_);
 
-	int x = (int)current.xIndex;
-	int z = (int)current.yIndex; 
+	int x = static_cast<int>(current.xIndex);
+	int z = static_cast<int>(current.yIndex); 
 
-	int stepX = (int)std::round(moveDirection_.x);
-	int stepZ = (int)std::round(moveDirection_.z);
+	int stepX = static_cast<int>(std::round(moveDirection_.x));
+	int stepZ = static_cast<int>(std::round(moveDirection_.z));
 
 	while (true) {
 

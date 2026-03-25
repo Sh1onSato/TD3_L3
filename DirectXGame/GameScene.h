@@ -7,6 +7,7 @@
 #include "CameraController.h"
 #include "DeathParticles.h"
 #include "Fade.h"
+#include "Box.h"
 
 /**
  * @brief ゲーム本編のメインシーン
@@ -74,4 +75,7 @@ private:
 	
 	// ブロックの座標情報などのリスト
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
+
+	//壊す箱
+	std::vector<Box*> boxes_;
 };

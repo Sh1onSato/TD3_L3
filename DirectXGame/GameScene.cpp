@@ -65,6 +65,33 @@ void GameScene::Initialize() {
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(0, 0);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 
+	//とりあえずのbox配置
+	std::vector<KamataEngine::Vector2> boxPositions = {
+	    {3,  0}, // 1つ目
+	    {4,  0},
+        {5,  0},
+
+		{1,1},
+        {2,2},
+		{3,3},
+        {4,4},
+
+		{1.0},
+        {0,1},
+
+	};
+
+	for (const auto& tilePos : boxPositions) {
+		Box* newBox = new Box();
+		Vector3 boxPosition = mapChipField_->GetMapChipPositionByIndex(static_cast<uint32_t>(tilePos.x), static_cast<uint32_t>(tilePos.y));
+		boxPosition.y = 1.0f;
+		Vector3 boxSize = {1.0f, 1.0f, 1.0f};
+		newBox->Initialize(blockModel_, &camera_, boxPosition);
+
+		boxes_.push_back(newBox);
+	}
+
+
 	// --- 5. 背景（スカイドーム）の初期化 ---
 	skydome_ = new Skydome();
 	skydome_->Initialize(skydomeModel_, &camera_);
@@ -153,6 +180,10 @@ void GameScene::Update() {
 	case Phase::kPlay:
 		player_->Update();
 		CheckAllCollisions();
+
+		for (Box* box : boxes_) {
+			box->Update();
+		}
 		break;
 
 	case Phase::kDeath:
@@ -206,6 +237,10 @@ void GameScene::Draw() {
 		deathParticles_->Draw();
 	}
 
+	for (Box* box : boxes_) {
+		box->Draw();
+	}
+
 	Model::PostDraw();
 
 	Sprite::PreDraw(dxCommon->GetCommandList());
@@ -218,4 +253,20 @@ void GameScene::Draw() {
 void GameScene::CheckAllCollisions() {
 	// エネミー削除に伴い、現在はプレイヤーとマップの判定のみ（Playerクラス内で処理済み）
 	// 将来的にアイテム等の判定が必要になればここに追加する
+
+	AABB playerAABB = player_->GetAABB();
+
+	for (Box* box : boxes_) {
+		// すでに壊れている場合はスキップ
+		if (!box->IsAlive()) {
+			continue;
+		}
+
+		AABB boxAABB = box->GetAABB();
+
+		if (IsCollision(playerAABB, boxAABB)) {
+				box->OnCollision();
+			
+		}
+	}
 }
