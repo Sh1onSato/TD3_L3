@@ -1,87 +1,77 @@
 #pragma once
-#include"Player.h"
-#include<vector>
-#include"Skydome.h"
-#include"MapChipField.h"
+#include "Player.h"
+#include <vector>
+#include <list>
+#include "Skydome.h"
+#include "MapChipField.h"
 #include "CameraController.h"
-#include "Enemy.h"
 #include "DeathParticles.h"
 #include "Fade.h"
 
-// ゲームシーン
+/**
+ * @brief ゲーム本編のメインシーン
+ */
 class GameScene {
 public:
+	// --- 公開メンバ関数 ---
+	
 	~GameScene();
-	// 初期化
+
+	/// @brief 初期化
 	void Initialize();
 
-	// 更新
+	/// @brief 更新
 	void Update();
 
-	// 描画
+	/// @brief 描画
 	void Draw();
 
+	/// @brief マップ上のブロックを生成
 	void GenerateBlocks();
 
+	/// @brief すべての当たり判定をチェック
 	void CheckAllCollisions();
 
+	/// @brief シーン終了フラグを取得
 	bool IsFinished() const { return finished_; }
 
 private:
+	// --- 内部フェーズ管理 ---
 	enum class Phase {
-		kFadeIn, // フェードイン
-		kPlay,  // ゲームプレイ
-		kDeath, // デス演出
+		kFadeIn,  // フェードイン
+		kPlay,    // ゲームプレイ中
+		kDeath,   // 死亡演出中
 		kFadeOut, // フェードアウト
 	};
-	Phase phase_;
+	Phase phase_; // 現在の進行状況
 
+	/// @brief フェーズの変更
 	void ChangePhase();
 
-	//テクスチャハンドル
-	uint32_t textureHandle_ = 0;
-	//3Dモデルデータ
-	KamataEngine::Model* model_ = nullptr;
+	// --- 3Dモデルデータ ---
+	KamataEngine::Model* model_ = nullptr;              // 汎用モデル
+	KamataEngine::Model* playerModel_ = nullptr;        // プレイヤーのモデル
+	KamataEngine::Model* blockModel_ = nullptr;         // ブロックのモデル
+	KamataEngine::Model* skydomeModel_ = nullptr;       // スカイドームのモデル
+	KamataEngine::Model* deathParticleModel_ = nullptr; // 死亡エフェクトのモデル
 
-	//カメラ
-	KamataEngine::Camera camera_;
-	// 自キャラ
-	Player* player_ = nullptr;
-	// プレイヤーモデル
-	KamataEngine::Model* player_model_ = nullptr;
+	// --- ゲームオブジェクト ---
+	Player* player_ = nullptr;          // 自キャラ
+	Skydome* skydome_ = nullptr;        // 背景の空
+	MapChipField* mapChipField_ = nullptr; // マップデータ
+	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理
 
-	// ブロックモデル
-	KamataEngine::Model* block_model_ = nullptr;
-	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
+	// --- カメラ・描画関連 ---
+	KamataEngine::Camera camera_;               // メインカメラ
+	CameraController* cameraController_ = nullptr; // カメラ制御
+	KamataEngine::DebugCamera* debugCamera_ = nullptr; // デバッグ用カメラ
+	bool isDebugCameraActive_ = false;          // デバッグカメラが有効か
+	uint32_t textureHandle_ = 0;               // テクスチャハンドル
 
-	// デバッグカメラ有効
-	bool isDebugCameraActive_ = false;
-	// デバッグカメラ
-	KamataEngine::DebugCamera* debugCamera_ = nullptr;
-
-
-	// スカイドーム
-	Skydome* skydome_ = nullptr;
-
-	// 3Dモデル
-	KamataEngine:: Model* modelSkydome_ = nullptr;
-
-	// マップチップフィールド
-	MapChipField* mapChipField_ = nullptr;
-
-	CameraController* CController_ = nullptr;
-
-	Enemy* enemy_ = nullptr;
-
-	KamataEngine::Model* enemy_model_ = nullptr;
-
-	std::list<Enemy*> enemies_;
-
-	DeathParticles* deathParticles_ = nullptr;
-
-	Model* deathParticle_model_ = nullptr;
-
-	bool finished_ = false;
-
-	Fade* fade_ = nullptr;
+	// --- システム関連 ---
+	Fade* fade_ = nullptr;      // 画面フェード演出
+	bool finished_ = false;    // シーン終了フラグ
+	
+	// ブロックの座標情報などのリスト
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 };

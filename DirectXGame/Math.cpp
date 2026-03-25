@@ -201,6 +201,16 @@ Vector3& operator/=(Vector3& v, float s) {
 	return v;
 }
 
+Vector3 operator+(const Vector3& v1, const Vector3& v2) {
+	Vector3 result = v1;
+	return result += v2;
+}
+
+Vector3 operator-(const Vector3& v1, const Vector3& v2) {
+	Vector3 result = v1;
+	return result -= v2;
+}
+
 Matrix4x4& operator*=(Matrix4x4& lhm, const Matrix4x4& rhm) {
 	Matrix4x4 result{};
 
