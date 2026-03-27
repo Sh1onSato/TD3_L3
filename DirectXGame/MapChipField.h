@@ -35,10 +35,11 @@ public:
 
 	void ResetMapChipData();
 
-	void LoadMapChipCsv(const std::string& filePath);
+	void LoadMapChipCsv(const std::string& filePath, uint32_t layer = 0);
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
-	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
+	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, uint32_t layer = 0);
+	void SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type, uint32_t layer = 0);
 
 	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
 	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
@@ -50,6 +51,7 @@ public:
 private:
 	static inline const uint32_t kNumBlockVirtical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 100;
+	static inline const uint32_t kNumLayers = 2;
 
-	MapChipData mapChipData_;
+	MapChipData mapChipData_[kNumLayers];
 };

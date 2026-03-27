@@ -73,8 +73,8 @@ private:
 	Fade* fade_ = nullptr;      // 画面フェード演出
 	bool finished_ = false;    // シーン終了フラグ
 	
-	// ブロックの座標情報などのリスト
-	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
+	// ブロックの座標情報などのリスト (レイヤー, Y, X)
+	std::vector<std::vector<std::vector<KamataEngine::WorldTransform*>>> worldTransformBlocks_;
 
 	//壊す箱
 	std::vector<Box*> boxes_;

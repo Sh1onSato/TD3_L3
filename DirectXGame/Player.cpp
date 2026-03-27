@@ -128,13 +128,17 @@ Vector3 Player::GetSlideTargetPosition() {
 			int nextX = x + stepX;
 
 			if (nextX >= 0) {
-				auto type = mapChipField_->GetMapChipTypeByIndex(nextX, z);
+				auto type = mapChipField_->GetMapChipTypeByIndex(nextX, z, 0);
+				auto obstacleType = mapChipField_->GetMapChipTypeByIndex(nextX, z, 1);
 
 				if (type == MapChipType::kBlock) {
+					if (obstacleType == MapChipType::kBlock) {
+						// 障害物に当たったので壊す
+						mapChipField_->SetMapChipTypeByIndex(nextX, z, MapChipType::kBlank, 1);
+					}
+					// 障害物を壊した、あるいは元々なかったのでそのまま進む
 					x = nextX;
 					moved = true;
-
-					//ここで壊す処理入れる？
 				}
 			}
 		}
@@ -144,13 +148,17 @@ Vector3 Player::GetSlideTargetPosition() {
 			int nextZ = z + stepZ;
 
 			if (nextZ >= 0) {
-				auto type = mapChipField_->GetMapChipTypeByIndex(x, nextZ);
+				auto type = mapChipField_->GetMapChipTypeByIndex(x, nextZ, 0);
+				auto obstacleType = mapChipField_->GetMapChipTypeByIndex(x, nextZ, 1);
 
 				if (type == MapChipType::kBlock) {
+					if (obstacleType == MapChipType::kBlock) {
+						// 障害物に当たったので壊す
+						mapChipField_->SetMapChipTypeByIndex(x, nextZ, MapChipType::kBlank, 1);
+					}
+					// 床があれば進み続ける
 					z = nextZ;
 					moved = true;
-
-			// ここで壊す処理入れる？
 				}
 			}
 		}

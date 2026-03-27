@@ -14,15 +14,23 @@ std::map<std::string, MapChipType> mapChipTable = {
 }
 
 void MapChipField::ResetMapChipData() {
-	mapChipData_.data.clear();
-	mapChipData_.data.resize(kNumBlockVirtical);
-	for (std::vector<MapChipType>& mapChipDataLine : mapChipData_.data) {
-		mapChipDataLine.resize(kNumBlockHorizontal, MapChipType::kBlank);
+	for (uint32_t i = 0; i < kNumLayers; ++i) {
+		mapChipData_[i].data.clear();
+		mapChipData_[i].data.resize(kNumBlockVirtical);
+		for (std::vector<MapChipType>& mapChipDataLine : mapChipData_[i].data) {
+			mapChipDataLine.resize(kNumBlockHorizontal, MapChipType::kBlank);
+		}
 	}
 }
 
-void MapChipField::LoadMapChipCsv(const std::string& filePath) {
-	ResetMapChipData();
+void MapChipField::LoadMapChipCsv(const std::string& filePath, uint32_t layer) {
+	assert(layer < kNumLayers);
+	// ResetMapChipDataはInitializeで1回だけ呼ぶようにする or レイヤーごとにリセットが必要ならここで特定レイヤーだけリセットする
+	// ここでは単一レイヤーの上書きを想定し、初期化は呼び出し側で行うか、個別にリセットする
+	for (std::vector<MapChipType>& mapChipDataLine : mapChipData_[layer].data) {
+		std::fill(mapChipDataLine.begin(), mapChipDataLine.end(), MapChipType::kBlank);
+	}
+
 	std::ifstream file;
 	file.open(filePath);
 	assert(file.is_open());
@@ -38,7 +46,7 @@ void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 			std::string word;
 			getline(line_stream, word, ',');
 			if (mapChipTable.contains(word)) {
-				mapChipData_.data[i][j] = mapChipTable[word];
+				mapChipData_[layer].data[i][j] = mapChipTable[word];
 			}
 		}
 	}
@@ -48,12 +56,18 @@ Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex
 	return Vector3(kBlockWidth * static_cast<float>(xIndex), 0.0f, kBlockHeight * (static_cast<float>(kNumBlockVirtical) - 1.0f - static_cast<float>(yIndex))); 
 }
 
-MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
+MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, uint32_t layer) {
 	// インデックスが範囲外ならすべて Blank（進めない場所）として扱う
-	if (xIndex >= kNumBlockHorizontal || yIndex >= kNumBlockVirtical) {
+	if (xIndex >= kNumBlockHorizontal || yIndex >= kNumBlockVirtical || layer >= kNumLayers) {
 		return MapChipType::kBlank;
 	}
-	return mapChipData_.data[yIndex][xIndex];
+	return mapChipData_[layer].data[yIndex][xIndex];
+}
+
+void MapChipField::SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type, uint32_t layer) {
+	if (xIndex < kNumBlockHorizontal && yIndex < kNumBlockVirtical && layer < kNumLayers) {
+		mapChipData_[layer].data[yIndex][xIndex] = type;
+	}
 }
 
 MapChipField::IndexSet MapChipField::GetMapChipIndexSetByPosition(const Vector3& position) {
