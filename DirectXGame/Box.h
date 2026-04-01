@@ -35,8 +35,7 @@ public:
 	KamataEngine::Vector3 GetWorldPosition();
 	AABB GetAABB();
 
-	// 統計用
-	inline static int breakCount = 0;
+	static int GetBreakCount() { return breakCount; }
 
 	Rect GetRect();
 
@@ -46,6 +45,9 @@ private:
 	KamataEngine::Vector3 size_;
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Camera* camera_ = nullptr;  
+	
+	// 統計用
+	inline static int breakCount = 0;
 
 	bool alive_ = true; // 壊れていないか
 };

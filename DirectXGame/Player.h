@@ -61,6 +61,8 @@ public:
 	// 箱との座標一致判定
 	void OnBoxCollision(Box* box);
 
+	int GetMoveCount() const { return moveCount_; }
+
 private:
 	// --- 内部処理用関数 ---
 
@@ -110,6 +112,7 @@ private:
 	bool onGround_ = true;           // 地面に足がついているか
 	bool isDead_ = false;            // 死亡フラグ
 	MapChipField* mapChipField_ = nullptr; // マップデータへの参照
+	int moveCount_ = 0;// 移動入力の回数
 
 	Vector3 moveDirection_ = {0, 0, 1};
 

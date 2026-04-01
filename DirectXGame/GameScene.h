@@ -78,4 +78,8 @@ private:
 
 	//壊す箱
 	std::vector<Box*> boxes_;
+
+	//クリア個数
+	//@ステージによって変えられるようにするか、個々で設定する
+	static inline const int kClearThreshold1 = 17;
 };

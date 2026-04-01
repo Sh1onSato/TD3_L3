@@ -191,6 +191,16 @@ void GameScene::Update() {
 		for (Box* box : boxes_) {
 			box->Update();
 		}
+
+		//クリア判定
+		if (Box::GetBreakCount() >= kClearThreshold1 ) {
+			OutputDebugStringA("STAGE CLEAR!!\n");
+		}
+
+		// ゲームオーバー判定
+		if (player_->GetMoveCount() > 5) {
+			OutputDebugStringA("GAME OVER...\n");
+		}
 		break;
 
 	case Phase::kDeath:

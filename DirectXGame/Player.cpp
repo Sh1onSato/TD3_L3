@@ -119,6 +119,8 @@ void Player::InputMove() {
 			return;
 		}
 
+		moveCount_++;
+
 		isMoving_ = true;
 		moveTimer_ = 0.0f;
 	}
