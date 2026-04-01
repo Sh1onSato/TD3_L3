@@ -72,3 +72,16 @@ AABB Box::GetAABB() {
 	};
 	return aabb;
 }
+
+Box::Rect Box::GetRect() {
+	// MapChipField::GetRectByIndex と同じ計算ロジックを Box の座標に適用
+	Vector3 center = worldTransform_.translation_;
+
+	Rect rect;
+	rect.left = center.x - kBlockWidth / 2.0f;
+	rect.right = center.x + kBlockWidth / 2.0f;
+	rect.bottom = center.z - kBlockHeight / 2.0f;
+	rect.top = center.z + kBlockHeight / 2.0f;
+
+	return rect;
+}

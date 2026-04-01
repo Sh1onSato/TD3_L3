@@ -59,7 +59,7 @@ private:
 	// --- ゲームオブジェクト ---
 	Player* player_ = nullptr;          // 自キャラ
 	Skydome* skydome_ = nullptr;        // 背景の空
-	MapChipField* mapChipField_ = nullptr; // マップデータ
+	MapChipField* mapChipField_ = nullptr; // マップデータ 
 	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理
 
 	// --- カメラ・描画関連 ---

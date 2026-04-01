@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Math.h"
+#include "Box.h"
 
 using namespace KamataEngine;
 
@@ -56,6 +57,9 @@ public:
 
 
 	Vector3 GetMoveDirection() const { return moveDirection_; }
+
+	// 箱との座標一致判定
+	void OnBoxCollision(Box* box);
 
 private:
 	// --- 内部処理用関数 ---
@@ -116,7 +120,7 @@ private:
 	float moveTimer_ = 0.0f;             // 移動アニメーションタイマー
 
 	// --- 定数（調整パラメータ） ---
-	static inline const float kMoveTime = 0.15f;          // 1マス移動にかかる時間（秒）
+	static inline const float kMoveTime = 0.3f;          // 1マス移動にかかる時間（秒）
 	static inline const float kTimeTurn = 0.3f;           // 旋回にかかる時間
 	static inline const float kWidth = 0.8f;              // キャラクターの横幅（判定用）
 	static inline const float kHeight = 0.8f;             // キャラクターの高さ（判定用）

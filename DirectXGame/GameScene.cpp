@@ -67,18 +67,25 @@ void GameScene::Initialize() {
 
 	//とりあえずのbox配置
 	std::vector<KamataEngine::Vector2> boxPositions = {
-	    {3,  0}, // 1つ目
-	    {4,  0},
-        {5,  0},
+	    {1.0},
+        {3, 0},
+        {4, 0},
+        {5, 0},
 
-		{1,1},
-        {2,2},
-		{3,3},
-        {4,4},
+	    {1, 1},
+        {2, 2},
+        {3, 3},
+        {4, 4},
+	    {5,5},
+	    {6,6},
+	    {7,7},
+	    {8,8},
+	    {9,9},
 
-		{1.0},
-        {0,1},
-
+	    {0, 1},
+        {0, 2},
+        {0, 3},
+        {0, 4},
 	};
 
 	for (const auto& tilePos : boxPositions) {
@@ -253,20 +260,11 @@ void GameScene::Draw() {
 void GameScene::CheckAllCollisions() {
 	// エネミー削除に伴い、現在はプレイヤーとマップの判定のみ（Playerクラス内で処理済み）
 	// 将来的にアイテム等の判定が必要になればここに追加する
-
-	AABB playerAABB = player_->GetAABB();
-
 	for (Box* box : boxes_) {
 		// すでに壊れている場合はスキップ
 		if (!box->IsAlive()) {
 			continue;
 		}
-
-		AABB boxAABB = box->GetAABB();
-
-		if (IsCollision(playerAABB, boxAABB)) {
-				box->OnCollision();
-			
-		}
+		player_->OnBoxCollision(box);
 	}
 }

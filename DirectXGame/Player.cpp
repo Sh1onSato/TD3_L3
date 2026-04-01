@@ -26,7 +26,7 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 }
 
 /**
- * @brief 更新
+ * @brief 更新 
  */
 void Player::Update() { 
 	InputMove();
@@ -55,6 +55,22 @@ void Player::Update() {
  */
 void Player::Draw() { 
 	model_->Draw(worldTransform_, *camera_, textureHandle_); 
+}
+
+void Player::OnBoxCollision(Box* box) {
+	// Boxの範囲を取得
+	Box::Rect bRect = box->GetRect();
+
+	// Playerの中心座標
+	Vector3 pPos = worldTransform_.translation_;
+
+	// 四隅ではなく「プレイヤーの中心」がBoxの内側にあるか判定
+	// マス移動であれば、中心点が入れば「そのマスにいる」とみなせます
+	bool isCenterInside = (pPos.x >= bRect.left && pPos.x <= bRect.right && pPos.z >= bRect.bottom && pPos.z <= bRect.top);
+
+	if (isCenterInside) {
+		box->OnCollision();
+	}
 }
 
 /**i

@@ -7,6 +7,17 @@ class Player;
 /// @brief 壊せる箱クラス
 class Box {
 public:
+
+	struct Rect {
+		float left;   // 左端
+		float right;  // 右端
+		float bottom; // 下端
+		float top;    // 上端
+	};
+
+	static inline const float kBlockWidth = 1.0f;
+	static inline const float kBlockHeight = 1.0f;
+
 	/// @brief 初期化
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
 
@@ -19,13 +30,15 @@ public:
 	/// @brief 破壊処理
 	void OnCollision();
 
-	// --- ゲッター ---
+	//ゲッター
 	bool IsAlive() const { return alive_; }
 	KamataEngine::Vector3 GetWorldPosition();
 	AABB GetAABB();
 
-	// --- 統計用（EnemyのclearCountと同じ仕組み） ---
+	// 統計用
 	inline static int breakCount = 0;
+
+	Rect GetRect();
 
 private:
 	KamataEngine::WorldTransform worldTransform_;
