@@ -40,6 +40,11 @@ void Player::Update() {
 			// 移動完了：目標マスの中心にスナップ
 			worldTransform_.translation_ = moveTargetPosition_;
 			isMoving_ = false;
+
+			// 移動回数を減らす
+			if (remainingMoves_ > 0) {
+				remainingMoves_--;
+			}
 		} else {
 			// EaseInOut で滑らかに補間
 			worldTransform_.translation_.x = EaseInOut(t, moveStartPosition_.x, moveTargetPosition_.x);
@@ -94,6 +99,8 @@ void Player::InputMove() {
 
 	  // SPACEでスライド開始
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		// 移動回数が残っていないなら移動不可
+		if (remainingMoves_ <= 0) return;
 
 		moveStartPosition_ = worldTransform_.translation_;
 		moveTargetPosition_ = GetSlideTargetPosition();

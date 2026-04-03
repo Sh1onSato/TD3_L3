@@ -33,6 +33,9 @@ public:
 	/// @brief すべての当たり判定をチェック
 	void CheckAllCollisions();
 
+	/// @brief ゲームをリセット（最初からやり直し）
+	void Reset();
+
 	/// @brief シーン終了フラグを取得
 	bool IsFinished() const { return finished_; }
 

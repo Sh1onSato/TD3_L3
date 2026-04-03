@@ -30,6 +30,10 @@ GameScene::~GameScene() {
 	delete blockModel_;
 	delete skydomeModel_;
 	delete deathParticleModel_;
+
+	for (Box* box : boxes_) {
+		delete box;
+	}
 }
 
 /**
@@ -82,7 +86,7 @@ void GameScene::Initialize() {
 	CameraController::Rect cameraArea = {0.0f, 100.0f, 0.0f, 20.0f};
 	cameraController_->SetMovableArea(cameraArea);
 
-	phase_ = Phase::kPlay;
+	phase_ = Phase::kFadeIn;
 }
 
 /**
@@ -97,6 +101,28 @@ void GameScene::ChangePhase() {
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition);
 		}
+		// 移動回数が0のとき、Rキーでリセット
+		else if (player_->GetRemainingMoves() <= 0 && Input::GetInstance()->TriggerKey(DIK_R)) {
+			phase_ = Phase::kFadeOut;
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+		}
+		else {
+			// すべての箱が壊れたかチェック (ravageBlocks)
+			bool allBroken = true;
+			int boxCount = 0;
+			for (Box* box : boxes_) {
+				boxCount++;
+				if (box->IsAlive()) {
+					allBroken = false;
+					break;
+				}
+			}
+
+			if (boxCount > 0 && allBroken && !player_->IsMoving()) {
+				phase_ = Phase::kFadeOut;
+				fade_->Start(Fade::Status::FadeOut, 1.0f);
+			}
+		}
 		break;
 	case Phase::kDeath:
 		if (deathParticles_ && deathParticles_->IsFinished()) {
@@ -106,9 +132,75 @@ void GameScene::ChangePhase() {
 		break;
 	case Phase::kFadeOut:
 		if (fade_->IsFinished()) {
-			finished_ = true;
+			// クリア条件の再確認
+			bool allBroken = true;
+			int boxCount = 0;
+			for (Box* box : boxes_) {
+				boxCount++;
+				if (box->IsAlive()) {
+					allBroken = false;
+					break;
+				}
+			}
+
+			// クリアしていたら終了（タイトルへ）
+			if (boxCount > 0 && allBroken) {
+				finished_ = true;
+			}
+			// プレイヤーが死亡しているか、リセットボタンが押された場合
+			else if (player_->IsDead() || player_->GetRemainingMoves() <= 0) {
+				Reset();
+				phase_ = Phase::kFadeIn;
+				fade_->Start(Fade::Status::FadeIn, 1.0f);
+			} else {
+				finished_ = true;
+			}
 		}
 		break;
+	}
+}
+
+/**
+ * @brief ゲームをリセット（最初からやり直し）
+ */
+void GameScene::Reset() {
+	// マップデータの再読み込み
+	mapChipField_->ResetMapChipData();
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+
+	// 既存のブロックWorldTransformをクリアして再生成
+	for (auto& layer : worldTransformBlocks_) {
+		for (auto& line : layer) {
+			for (WorldTransform* block : line) {
+				delete block;
+			}
+			line.clear();
+		}
+		layer.clear();
+	}
+	worldTransformBlocks_.clear();
+
+	// 既存の箱を削除
+	for (Box* box : boxes_) {
+		delete box;
+	}
+	boxes_.clear();
+
+	GenerateBlocks();
+
+	// プレイヤーの位置と状態を初期化
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(0, 0);
+	player_->Initialize(playerModel_, &camera_, playerPosition);
+	player_->SetRemainingMoves(10); // 回数をリセット
+
+	// カメラの初期化
+	cameraController_->Reset();
+
+	// 死亡エフェクトがあれば消す
+	if (deathParticles_) {
+		delete deathParticles_;
+		deathParticles_ = nullptr;
 	}
 }
 
@@ -119,24 +211,31 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockVertical = mapChipField_->GetNumBlockVirtical();
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
-	worldTransformBlocks_.resize(2); // レイヤー 0:床, 1:障害物
-	for (uint32_t layer = 0; layer < 2; ++layer) {
-		worldTransformBlocks_[layer].resize(numBlockVertical);
-		for (uint32_t i = 0; i < numBlockVertical; ++i) {
-			worldTransformBlocks_[layer][i].resize(numBlockHorizontal, nullptr);
-		}
+	// レイヤー 0:床 (WorldTransform)
+	worldTransformBlocks_.resize(1); 
+	worldTransformBlocks_[0].resize(numBlockVertical);
+	for (uint32_t i = 0; i < numBlockVertical; ++i) {
+		worldTransformBlocks_[0][i].resize(numBlockHorizontal, nullptr);
 	}
 
-	for (uint32_t layer = 0; layer < 2; ++layer) {
-		for (uint32_t i = 0; i < numBlockVertical; ++i) {
-			for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
-				if (mapChipField_->GetMapChipTypeByIndex(j, i, layer) == MapChipType::kBlock) {
-					WorldTransform* worldTransform = new WorldTransform();
-					worldTransform->Initialize();
-					worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
-					worldTransform->translation_.y = static_cast<float>(layer);
-					worldTransformBlocks_[layer][i][j] = worldTransform;
-				}
+	for (uint32_t i = 0; i < numBlockVertical; ++i) {
+		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+			// レイヤー 0: 床
+			if (mapChipField_->GetMapChipTypeByIndex(j, i, 0) == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				worldTransform->translation_.y = 0.0f;
+				worldTransformBlocks_[0][i][j] = worldTransform;
+			}
+
+			// レイヤー 1: 破壊可能なブロック (Box)
+			if (mapChipField_->GetMapChipTypeByIndex(j, i, 1) == MapChipType::kBlock) {
+				Box* newBox = new Box();
+				Vector3 position = mapChipField_->GetMapChipPositionByIndex(j, i);
+				position.y = 1.0f; // 高さを合わせる
+				newBox->Initialize(blockModel_, &camera_, position);
+				boxes_.push_back(newBox);
 			}
 		}
 	}
@@ -148,12 +247,12 @@ void GameScene::GenerateBlocks() {
 void GameScene::Update() { 
 	ChangePhase();
 
+	fade_->Update();
 	skydome_->Update();
 	cameraController_->Update();
 	
 	switch (phase_) {
 	case Phase::kFadeIn:
-		fade_->Update();
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kPlay;
 		}
@@ -176,7 +275,6 @@ void GameScene::Update() {
 		break;
 
 	case Phase::kFadeOut:
-		fade_->Update();
 		break;
 	}
 
@@ -232,6 +330,9 @@ void GameScene::Draw() {
 	}
 
 	Model::PostDraw();
+
+	// フェードの描画
+	fade_->Draw();
 
 	Sprite::PreDraw(dxCommon->GetCommandList());
 	Sprite::PostDraw();

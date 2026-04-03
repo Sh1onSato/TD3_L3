@@ -53,9 +53,13 @@ public:
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 	Vector3 GetWorldPosition();
 	bool IsDead() const { return isDead_; }
-
+	bool IsMoving() const { return isMoving_; }
 
 	Vector3 GetMoveDirection() const { return moveDirection_; }
+
+	// 移動回数関連
+	int32_t GetRemainingMoves() const { return remainingMoves_; }
+	void SetRemainingMoves(int32_t moves) { remainingMoves_ = moves; }
 
 private:
 	// --- 内部処理用関数 ---
@@ -108,6 +112,7 @@ private:
 	MapChipField* mapChipField_ = nullptr; // マップデータへの参照
 
 	Vector3 moveDirection_ = {0, 0, 1};
+	int32_t remainingMoves_ = 10;        // 残り移動回数
 
 	// --- マス移動アニメーション ---
 	bool isMoving_ = false;               // マス移動中か
