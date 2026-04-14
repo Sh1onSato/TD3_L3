@@ -233,7 +233,16 @@ void GameScene::GenerateBlocks() {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i, 1) == MapChipType::kBlock) {
 				Box* newBox = new Box();
 				Vector3 position = mapChipField_->GetMapChipPositionByIndex(j, i);
-				position.y = 1.0f; // 高さを合わせる
+
+				// 高さを合わせる
+				if (i < 10) {
+					// 1〜10行目　1段目
+					position.y = 1.0f;
+				} else if (10 <= i && i < 20) {
+					// 11〜20行目　2段目
+					position.y = 2.0f;
+					position.z += (10.0f * MapChipField::kBlockHeight);
+				}
 				newBox->Initialize(blockModel_, &camera_, position);
 				boxes_.push_back(newBox);
 			}
@@ -262,6 +271,41 @@ void GameScene::Update() {
 	case Phase::kPlay:
 		player_->Update();
 		CheckAllCollisions();
+
+		for (Box* box : boxes_) {
+			if (!box->IsAlive())
+				continue;
+
+			Vector3 pos = box->GetPosition();
+
+			// 1段目は落下しない
+			if (pos.y <= 1.05f) {
+				box->SetonGround(true);
+				continue;
+			}
+
+			// 自分の1マス下の座標を出す
+			Vector3 underPos = pos;
+			underPos.y -= 1.0f;
+			// その場所のインデックスを取得
+			MapChipField::IndexSet indexUnder = mapChipField_->GetMapChipIndexSetByPosition(underPos);
+
+			// その場所にブロックがあるか判定する
+			MapChipType typeUnder = mapChipField_->GetMapChipTypeByIndex(indexUnder.xIndex, indexUnder.yIndex, 1);
+
+			//判定
+			if (typeUnder == MapChipType::kBlank) {
+				// 真下が空っぽなら落下する
+				box->SetonGround(false);
+			} else {
+				// 下にブロックがあれば着地
+				box->SetonGround(true);
+
+				// y座標を整数値に補正
+				pos.y = std::round(pos.y);
+				box->SetPosition(pos);
+			}
+		}
 
 		for (Box* box : boxes_) {
 			box->Update();
@@ -357,7 +401,9 @@ void GameScene::CheckAllCollisions() {
 
 		if (IsCollision(playerAABB, boxAABB)) {
 				box->OnCollision();
-			
+			Vector3 pos = box->GetPosition();
+			MapChipField::IndexSet index = mapChipField_->GetMapChipIndexSetByPosition(pos);
+			mapChipField_->SetMapChipTypeByIndex(index.xIndex, index.yIndex, MapChipType::kBlank, 1);
 		}
 	}
 }

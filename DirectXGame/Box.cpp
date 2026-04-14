@@ -20,6 +20,15 @@ void Box::Update() {
 		return;
 	}
 
+	//とりあえず下まで落下させる
+	if (!onGround_) {
+		velocity_.y -= 0.005f;
+	} else {
+		velocity_.y = 0.0f;
+	}
+
+	worldTransform_.translation_.y += velocity_.y;
+
 	// 行列の更新 (Enemy.cpp と同じ計算式)
 	worldTransform_.matWorld_ = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
 

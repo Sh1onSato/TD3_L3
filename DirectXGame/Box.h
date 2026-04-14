@@ -24,6 +24,11 @@ public:
 	KamataEngine::Vector3 GetWorldPosition();
 	AABB GetAABB();
 
+
+	void SetonGround(bool onGround) { onGround_ = onGround; }
+	Vector3 GetPosition() const { return worldTransform_.translation_; }
+	void SetPosition(const Vector3& pos) { worldTransform_.translation_ = pos; }
+
 	// --- 統計用（EnemyのclearCountと同じ仕組み） ---
 	inline static int breakCount = 0;
 
@@ -34,5 +39,9 @@ private:
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Camera* camera_ = nullptr;  
 
+	Vector3 velocity_ = {0.0f, 0.0f, 0.0f};
+
 	bool alive_ = true; // 壊れていないか
+
+	bool onGround_ = false;//一番下の段か
 };
