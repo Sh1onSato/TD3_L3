@@ -356,7 +356,7 @@ void GameScene::CheckAllCollisions() {
 		AABB boxAABB = box->GetAABB();
 
 		if (IsCollision(playerAABB, boxAABB)) {
-				box->OnCollision();
+				box->OnCollision(player_->GetMoveDirection());
 			
 		}
 	}
