@@ -19,7 +19,8 @@ public:
 	~GameScene();
 
 	/// @brief 初期化
-	void Initialize();
+	/// @param stageNumber ロードするステージ番号 (0始まり)
+	void Initialize(int stageNumber = 0);
 
 	/// @brief 更新
 	void Update();
@@ -75,6 +76,7 @@ private:
 	// --- システム関連 ---
 	Fade* fade_ = nullptr;      // 画面フェード演出
 	bool finished_ = false;    // シーン終了フラグ
+	int stageNumber_ = 0;      // 現在のステージ番号
 	
 	// ブロックの座標情報などのリスト (レイヤー, Y, X)
 	std::vector<std::vector<std::vector<KamataEngine::WorldTransform*>>> worldTransformBlocks_;

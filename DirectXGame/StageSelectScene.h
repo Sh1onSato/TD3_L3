@@ -22,6 +22,9 @@ public:
 
 	bool IsFinished() const { return finished_; }
 
+	/// @brief 選択中のステージ番号を取得
+	int GetSelectedStage() const { return currentStage_; }
+
 private:
 	// ビュープロジェクション
 	Camera camera_;
@@ -36,7 +39,8 @@ private:
 
 	// ステージ選択用
 	int currentStage_ = 0;           // 現在選択中のステージ (0, 1, 2...)
-	static inline const int kMaxStage = 8; // 最大ステージ数
+	static inline const int kMaxStage = 3; // 最大ステージ数
+	static inline const int kStagesPerRow = 3; // 1行あたりのステージ数
 	float targetX_ = 0.0f;           // プレイヤーの目標X座標
 	float targetY_ = 0.0f;           // プレイヤーの目標Y座標
 

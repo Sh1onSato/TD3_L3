@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "Math.h"
+#include <string>
 
 using namespace KamataEngine;
 
@@ -39,7 +40,8 @@ GameScene::~GameScene() {
 /**
  * @brief 初期化
  */
-void GameScene::Initialize() {
+void GameScene::Initialize(int stageNumber) {
+	stageNumber_ = stageNumber;
 	// --- 1. システム・カメラの初期化 ---
 	camera_.Initialize();
 	// カメラを斜め上からの俯瞰視点に設定
@@ -62,8 +64,10 @@ void GameScene::Initialize() {
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
 	mapChipField_->ResetMapChipData();
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+	std::string floorCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_floor.csv";
+	std::string ravageCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_ravage.csv";
+	mapChipField_->LoadMapChipCsv(floorCsv, 0);
+	mapChipField_->LoadMapChipCsv(ravageCsv, 1);
 	GenerateBlocks();
 
 	// --- 4. プレイヤーの生成と初期化 ---
@@ -166,8 +170,10 @@ void GameScene::ChangePhase() {
 void GameScene::Reset() {
 	// マップデータの再読み込み
 	mapChipField_->ResetMapChipData();
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+	std::string floorCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_floor.csv";
+	std::string ravageCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_ravage.csv";
+	mapChipField_->LoadMapChipCsv(floorCsv, 0);
+	mapChipField_->LoadMapChipCsv(ravageCsv, 1);
 
 	// 既存のブロックWorldTransformをクリアして再生成
 	for (auto& layer : worldTransformBlocks_) {
