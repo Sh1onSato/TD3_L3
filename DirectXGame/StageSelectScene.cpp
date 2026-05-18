@@ -1,5 +1,6 @@
 #include "StageSelectScene.h"
 #include "Math.h"
+#include <string>
 
 StageSelectScene::~StageSelectScene() {
 	delete model_;
@@ -110,6 +111,22 @@ void StageSelectScene::Draw() {
 	model_->Draw(worldTransform_, camera_);
 	
 	Model::PostDraw();
+
+	// 各ステージの番号をテキストで表示
+	Sprite::PreDraw(commandList);
+	for (int i = 0; i < kMaxStage; i++) {
+		// ステージポイントの 3D 座標 → スクリーン座標に変換
+		Vector3 pos3D = stageTransforms_[i].translation_;
+		pos3D.y += 1.2f; // テキストをポイントの上にずらす
+		Vector3 ndcPos = Transform(Transform(pos3D, camera_.matView), camera_.matProjection);
+		float screenX = (ndcPos.x + 1.0f) * 0.5f * (float)WinApp::kWindowWidth;
+		float screenY = (1.0f - ndcPos.y) * 0.5f * (float)WinApp::kWindowHeight;
+
+		std::string label = "Stage " + std::to_string(i + 1);
+		DebugText::GetInstance()->Print(label, screenX - 30.0f, screenY, 2.0f);
+	}
+	DebugText::GetInstance()->DrawAll();
+	Sprite::PostDraw();
 
 	fade_->Draw();
 }
