@@ -39,8 +39,8 @@ private:
 
 	// ステージ選択用
 	int currentStage_ = 0;           // 現在選択中のステージ (0, 1, 2...)
-	static inline const int kMaxStage = 5; // 最大ステージ数
-	static inline const int kStagesPerRow = 5; // 1行あたりのステージ数
+	static inline const int kMaxStage = 5;     // 最大ステージ数
+	static inline const int kStagesPerRow = 5; // 1行あたりのステージ数（全ステージを1行表示）
 	float targetX_ = 0.0f;           // プレイヤーの目標X座標
 	float targetY_ = 0.0f;           // プレイヤーの目標Y座標
 
