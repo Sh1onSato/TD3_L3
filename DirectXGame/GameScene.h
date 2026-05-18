@@ -8,6 +8,7 @@
 #include "DeathParticles.h"
 #include "Fade.h"
 #include "Box.h"
+#include "Interface.h"
 
 /**
  * @brief ゲーム本編のメインシーン
@@ -58,12 +59,14 @@ private:
 	KamataEngine::Model* blockModel_ = nullptr;         // ブロックのモデル
 	KamataEngine::Model* skydomeModel_ = nullptr;       // スカイドームのモデル
 	KamataEngine::Model* deathParticleModel_ = nullptr; // 死亡エフェクトのモデル
+	KamataEngine::Model* interfaceModel_ = nullptr;     // インターフェースのモデル
 
 	// --- ゲームオブジェクト ---
 	Player* player_ = nullptr;          // 自キャラ
 	Skydome* skydome_ = nullptr;        // 背景の空
 	MapChipField* mapChipField_ = nullptr; // マップデータ
 	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理
+	Interface* interface_ = nullptr;           // インターフェース管理
 
 	// --- カメラ・描画関連 ---
 	KamataEngine::Camera camera_;               // メインカメラ
