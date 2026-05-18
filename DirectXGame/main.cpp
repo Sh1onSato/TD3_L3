@@ -61,17 +61,25 @@ void ChangeScene() {
 		break;
 
 	case Scene::kGame:
-		// ゲームシーンが終了していたら、タイトルシーンへ
+		// ゲームシーンが終了していたら
 		if (gameScene->IsFinished()) {
-			scene = Scene::kTitle;
+			bool returnToSelect = gameScene->IsReturnToStageSelect();
 
 			// ゲームシーンのメモリを解放
 			delete gameScene;
 			gameScene = nullptr;
 
-			// タイトルシーンの作成と初期化
-			titleScene = new TitleScene;
-			titleScene->Initialize();
+			if (returnToSelect) {
+				// ステージセレクトシーンへ戻る
+				scene = Scene::kStageSelect;
+				stageSelectScene = new StageSelectScene;
+				stageSelectScene->Initialize();
+			} else {
+				// タイトルシーンへ
+				scene = Scene::kTitle;
+				titleScene = new TitleScene;
+				titleScene->Initialize();
+			}
 		}
 		break;
 	}

@@ -112,6 +112,12 @@ void GameScene::ChangePhase() {
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 		}
+		// Escape キーでステージセレクトへ戻る
+		else if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+			returnToStageSelect_ = true;
+			phase_ = Phase::kFadeOut;
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+		}
 		else {
 			// すべての箱が壊れたかチェック (ravageBlocks)
 			bool allBroken = true;
@@ -150,7 +156,11 @@ void GameScene::ChangePhase() {
 			}
 
 			// クリアしていたら終了（タイトルへ）
-			if (boxCount > 0 && allBroken) {
+			if (returnToStageSelect_) {
+				finished_ = true;
+			}
+			// クリアしていたら終了（タイトルへ）
+			else if (boxCount > 0 && allBroken) {
 				finished_ = true;
 			}
 			// リセット要求、プレイヤー死亡、または移動回数が尽きた場合はリセット

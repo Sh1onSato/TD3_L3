@@ -40,6 +40,9 @@ public:
 	/// @brief シーン終了フラグを取得
 	bool IsFinished() const { return finished_; }
 
+	/// @brief ステージセレクトへ戻るフラグを取得
+	bool IsReturnToStageSelect() const { return returnToStageSelect_; }
+
 private:
 	// --- 内部フェーズ管理 ---
 	enum class Phase {
@@ -74,10 +77,11 @@ private:
 	uint32_t textureHandle_ = 0;               // テクスチャハンドル
 
 	// --- システム関連 ---
-	Fade* fade_ = nullptr;         // 画面フェード演出
-	bool finished_ = false;        // シーン終了フラグ
-	bool resetRequested_ = false;  // リセット要求フラグ
-	int stageNumber_ = 0;          // 現在のステージ番号
+	Fade* fade_ = nullptr;                // 画面フェード演出
+	bool finished_ = false;               // シーン終了フラグ
+	bool resetRequested_ = false;         // リセット要求フラグ
+	bool returnToStageSelect_ = false;    // ステージセレクトへ戻るフラグ
+	int stageNumber_ = 0;                 // 現在のステージ番号
 	
 	// ブロックの座標情報などのリスト (レイヤー, Y, X)
 	std::vector<std::vector<std::vector<KamataEngine::WorldTransform*>>> worldTransformBlocks_;
