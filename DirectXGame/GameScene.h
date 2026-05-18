@@ -74,9 +74,10 @@ private:
 	uint32_t textureHandle_ = 0;               // テクスチャハンドル
 
 	// --- システム関連 ---
-	Fade* fade_ = nullptr;      // 画面フェード演出
-	bool finished_ = false;    // シーン終了フラグ
-	int stageNumber_ = 0;      // 現在のステージ番号
+	Fade* fade_ = nullptr;         // 画面フェード演出
+	bool finished_ = false;        // シーン終了フラグ
+	bool resetRequested_ = false;  // リセット要求フラグ
+	int stageNumber_ = 0;          // 現在のステージ番号
 	
 	// ブロックの座標情報などのリスト (レイヤー, Y, X)
 	std::vector<std::vector<std::vector<KamataEngine::WorldTransform*>>> worldTransformBlocks_;

@@ -107,6 +107,7 @@ void GameScene::ChangePhase() {
 		}
 		// R キーでいつでもリセット
 		else if (Input::GetInstance()->TriggerKey(DIK_R)) {
+			resetRequested_ = true;
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 		}
@@ -151,8 +152,9 @@ void GameScene::ChangePhase() {
 			if (boxCount > 0 && allBroken) {
 				finished_ = true;
 			}
-			// プレイヤーが死亡しているか、リセットボタンが押された場合
-			else if (player_->IsDead() || player_->GetRemainingMoves() <= 0) {
+			// リセット要求、プレイヤー死亡、または移動回数が尽きた場合はリセット
+			else if (resetRequested_ || player_->IsDead() || player_->GetRemainingMoves() <= 0) {
+				resetRequested_ = false;
 				Reset();
 				phase_ = Phase::kFadeIn;
 				fade_->Start(Fade::Status::FadeIn, 1.0f);
