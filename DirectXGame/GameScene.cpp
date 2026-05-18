@@ -106,6 +106,7 @@ void GameScene::ChangePhase() {
 			deathParticles_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition);
 		}
 		// R キーでいつでもリセット
+		// フェードアウト完了後にリセットを実行するため、フラグを立ててフェードアウト開始
 		else if (Input::GetInstance()->TriggerKey(DIK_R)) {
 			resetRequested_ = true;
 			phase_ = Phase::kFadeOut;
