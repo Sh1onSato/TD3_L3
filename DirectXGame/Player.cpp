@@ -23,6 +23,13 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	
 	// 初期方向を前（Z軸プラス）に向ける
 	worldTransform_.rotation_.y = 0.0f;
+
+	// 状態フラグのリセット
+	isDead_ = false;
+	isMoving_ = false;
+	moveTimer_ = 0.0f;
+	remainingMoves_ = 10;
+	moveDirection_ = {0, 0, 1};
 }
 
 /**

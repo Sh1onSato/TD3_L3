@@ -105,8 +105,8 @@ void GameScene::ChangePhase() {
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition);
 		}
-		// 移動回数が0のとき、Rキーでリセット
-		else if (player_->GetRemainingMoves() <= 0 && Input::GetInstance()->TriggerKey(DIK_R)) {
+		// Rキーでいつでもリセット
+		else if (Input::GetInstance()->TriggerKey(DIK_R)) {
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 		}
