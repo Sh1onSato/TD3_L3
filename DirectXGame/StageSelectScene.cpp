@@ -11,7 +11,7 @@ StageSelectScene::~StageSelectScene() {
 void StageSelectScene::Initialize() {
 	camera_.Initialize();
 	// カメラをさらに近づける
-	camera_.translation_ = { 0.0f, 0.0f, -12.0f };
+	camera_.translation_ = { 0.0f, 0.0f, -15.0f };
 	camera_.rotation_ = { 0.0f, 0.0f, 0.0f };
 	
 	model_ = Model::CreateFromOBJ("player");
@@ -19,8 +19,8 @@ void StageSelectScene::Initialize() {
 	
 	worldTransform_.Initialize();
 	
-	// ステージポイントの配置 (3つを1行に横並び)
-	float intervalX = 5.0f;
+	// ステージポイントの配置 (5つを1行に横並び)
+	float intervalX = 4.0f;
 	float offsetX = (float)(kStagesPerRow - 1) * intervalX / 2.0f;
 
 	for (int i = 0; i < kMaxStage; i++) {
