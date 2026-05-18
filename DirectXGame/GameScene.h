@@ -18,8 +18,8 @@ public:
 	
 	~GameScene();
 
-	/// @brief 初期化
-	void Initialize();
+	//ロードするステージ番号 (0始まり)
+	void Initialize(int stageNumber = 0);
 
 	/// @brief 更新
 	void Update();
@@ -36,8 +36,12 @@ public:
 	/// @brief ゲームをリセット（最初からやり直し）
 	void Reset();
 
-	/// @brief シーン終了フラグを取得
+	//シーン終了フラグを取得
 	bool IsFinished() const { return finished_; }
+
+	//ステージセレクトへ戻るフラグを取得
+	bool IsReturnToStageSelect() const { return returnToStageSelect_; }
+
 
 private:
 	// --- 内部フェーズ管理 ---
@@ -73,8 +77,11 @@ private:
 	uint32_t textureHandle_ = 0;               // テクスチャハンドル
 
 	// --- システム関連 ---
-	Fade* fade_ = nullptr;      // 画面フェード演出
-	bool finished_ = false;    // シーン終了フラグ
+	Fade* fade_ = nullptr;             // 画面フェード演出
+	bool finished_ = false;            // シーン終了フラグ
+	bool resetRequested_ = false;      // リセット要求フラグ
+	bool returnToStageSelect_ = false; // ステージセレクトへ戻るフラグ
+	int stageNumber_ = 0;              // 現在のステージ番号
 	
 	// ブロックの座標情報などのリスト (レイヤー, Y, X)
 	std::vector<std::vector<std::vector<KamataEngine::WorldTransform*>>> worldTransformBlocks_;

@@ -1,6 +1,6 @@
 #pragma once
-#include "KamataEngine.h"
 #include "Fade.h"
+#include "KamataEngine.h"
 
 using namespace KamataEngine;
 
@@ -22,12 +22,15 @@ public:
 
 	bool IsFinished() const { return finished_; }
 
+	//選択中のステージ番号を取得
+	int GetSelectedStage() const { return currentStage_; }
+
 private:
 	// ビュープロジェクション
 	Camera camera_;
 	WorldTransform worldTransform_;
 	Model* model_ = nullptr;
-	
+
 	bool finished_ = false;
 
 	Fade* fade_ = nullptr;
@@ -35,7 +38,12 @@ private:
 	Phase phase_ = Phase::kFadeIn;
 
 	// ステージ選択用
-	int currentStage_ = 0;           // 現在選択中のステージ (0, 1, 2...)
-	static inline const int kMaxStage = 3; // 最大ステージ数
-	float targetX_ = 0.0f;           // プレイヤーの目標X座標
+	int currentStage_ = 0;                 // 現在選択中のステージ (0, 1, 2...)
+	static inline const int kMaxStage = 8; // 最大ステージ数
+	//static inline const int kStagesPerRow = 5; // 1行あたりのステージ数
+	float targetX_ = 0.0f;                 // プレイヤーの目標X座標
+	float targetY_ = 0.0f;                 // プレイヤーの目標Y座標
+
+	WorldTransform stageTransforms_[kMaxStage]; // ステージのポイント
+	Model* stageModel_ = nullptr;               // ステージのモデル
 };

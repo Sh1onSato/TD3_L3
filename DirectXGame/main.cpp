@@ -22,8 +22,8 @@ enum class Scene {
 Scene scene = Scene::kUnknown; // 現在のシーン
 
 /**
- * @brief シーンの切り替え判定と実行
- * 各シーンの終了フラグをチェックし、次のシーンへ遷移させる。
+ シーンの切り替え判定と実行
+ 各シーンの終了フラグをチェックし、次のシーンへ遷移させる。
  */
 void ChangeScene() {
 	switch (scene) {
@@ -47,28 +47,40 @@ void ChangeScene() {
 		if (stageSelectScene->IsFinished()) {
 			scene = Scene::kGame;
 
+			// 選択されたステージ番号を取得
+			int selectedStage = stageSelectScene->GetSelectedStage();
+
+
 			// ステージ選択のメモリを解放
 			delete stageSelectScene;
 			stageSelectScene = nullptr;
 
 			// ゲームシーンの作成と初期化
 			gameScene = new GameScene;
-			gameScene->Initialize();
+			gameScene->Initialize(selectedStage);
 		}
 		break;
 
 	case Scene::kGame:
-		// ゲームシーンが終了していたら、タイトルシーンへ
+		// ゲームシーンが終了していたら
 		if (gameScene->IsFinished()) {
-			scene = Scene::kTitle;
+			bool returnToSelect = gameScene->IsReturnToStageSelect();
 
 			// ゲームシーンのメモリを解放
 			delete gameScene;
 			gameScene = nullptr;
 
-			// タイトルシーンの作成と初期化
-			titleScene = new TitleScene;
-			titleScene->Initialize();
+			if (returnToSelect) {
+				// ステージセレクトシーンへ戻る
+				scene = Scene::kStageSelect;
+				stageSelectScene = new StageSelectScene;
+				stageSelectScene->Initialize();
+			} else {
+				// タイトルシーンへ
+				scene = Scene::kTitle;
+				titleScene = new TitleScene;
+				titleScene->Initialize();
+			}
 		}
 		break;
 	}

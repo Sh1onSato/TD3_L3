@@ -23,6 +23,14 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	
 	// 初期方向を前（Z軸プラス）に向ける
 	worldTransform_.rotation_.y = 0.0f;
+
+	// 状態フラグのリセット
+	isDead_ = false;
+	isMoving_ = false;
+	moveTimer_ = 0.0f;
+	remainingMoves_ = kDefaultRemainingMoves;
+	moveDirection_ = {0, 0, 1};
+
 }
 
 /**
@@ -211,7 +219,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexRF.xIndex, indexRF.yIndex);
 		info.move.x = std::max(0.0f, rect.left - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
 		info.hitWall = true;
-	}
+	}    
 }
 
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) { 

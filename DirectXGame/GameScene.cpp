@@ -1,12 +1,13 @@
 #include "GameScene.h"
 #include "Math.h"
+#include <string>
 
 using namespace KamataEngine;
 
 /**
  * @brief デストラクタ
  */
-GameScene::~GameScene() { 
+GameScene::~GameScene() {
 	delete model_;
 	delete player_;
 	delete debugCamera_;
@@ -23,9 +24,9 @@ GameScene::~GameScene() {
 		}
 	}
 	worldTransformBlocks_.clear();
-	
+
 	delete deathParticles_;
-	
+
 	delete playerModel_;
 	delete blockModel_;
 	delete skydomeModel_;
@@ -39,15 +40,16 @@ GameScene::~GameScene() {
 /**
  * @brief 初期化
  */
-void GameScene::Initialize() {
+void GameScene::Initialize(int stageNumber) {
+	stageNumber_ = stageNumber;
 	// --- 1. システム・カメラの初期化 ---
 	camera_.Initialize();
 	// カメラを斜め上からの俯瞰視点に設定
-	camera_.translation_ = { 0.0f, 15.0f, -10.0f }; // 高く、手前に
-	camera_.rotation_ = { 0.8f, 0.0f, 0.0f };      // 下を向く
-	
+	camera_.translation_ = {0.0f, 15.0f, -10.0f}; // 高く、手前に
+	camera_.rotation_ = {0.8f, 0.0f, 0.0f};       // 下を向く
+
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
-	
+
 	fade_ = new Fade();
 	fade_->Initialize();
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
@@ -62,8 +64,10 @@ void GameScene::Initialize() {
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
 	mapChipField_->ResetMapChipData();
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+	std::string floorCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_floor.csv";
+	std::string ravageCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_ravage.csv";
+	mapChipField_->LoadMapChipCsv(floorCsv, 0);
+	mapChipField_->LoadMapChipCsv(ravageCsv, 1);
 	GenerateBlocks();
 
 	// --- 4. プレイヤーの生成と初期化 ---
@@ -78,8 +82,8 @@ void GameScene::Initialize() {
 	skydome_->Initialize(skydomeModel_, &camera_);
 
 	// --- 6. カメラコントローラーの初期化 ---
-	cameraController_ = new CameraController(); 
-	cameraController_->Initialize(&camera_);    
+	cameraController_ = new CameraController();
+	cameraController_->Initialize(&camera_);
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
 	// カメラの移動可能範囲（XZ平面に合わせて調整）
@@ -101,12 +105,18 @@ void GameScene::ChangePhase() {
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition);
 		}
-		// 移動回数が0のとき、Rキーでリセット
-		else if (player_->GetRemainingMoves() <= 0 && Input::GetInstance()->TriggerKey(DIK_R)) {
+		// Rキーでいつでもリセット
+		else if (Input::GetInstance()->TriggerKey(DIK_R)) {
+			resetRequested_ = true;
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
-		}
-		else {
+		} 
+		// ESCキーでステージセレクトへ戻る
+		else if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+			returnToStageSelect_ = true;
+			phase_ = Phase::kFadeOut;
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+		}else {
 			// すべての箱が壊れたかチェック (ravageBlocks)
 			bool allBroken = true;
 			int boxCount = 0;
@@ -144,11 +154,16 @@ void GameScene::ChangePhase() {
 			}
 
 			// クリアしていたら終了（タイトルへ）
-			if (boxCount > 0 && allBroken) {
+			if (returnToStageSelect_) {
 				finished_ = true;
 			}
-			// プレイヤーが死亡しているか、リセットボタンが押された場合
-			else if (player_->IsDead() || player_->GetRemainingMoves() <= 0) {
+			// クリアしていたら終了（タイトルへ）
+			else if (boxCount > 0 && allBroken) {
+				finished_ = true;
+			}
+			// リセット要求、プレイヤー死亡、または移動回数が尽きた場合はリセット
+			else if (resetRequested_ || player_->IsDead() || player_->GetRemainingMoves() <= 0) {
+				resetRequested_ = false;
 				Reset();
 				phase_ = Phase::kFadeIn;
 				fade_->Start(Fade::Status::FadeIn, 1.0f);
@@ -166,8 +181,10 @@ void GameScene::ChangePhase() {
 void GameScene::Reset() {
 	// マップデータの再読み込み
 	mapChipField_->ResetMapChipData();
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+	std::string floorCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_floor.csv";
+	std::string ravageCsv = "Resources/mapCsv/stage" + std::to_string(stageNumber_) + "_ravage.csv";
+	mapChipField_->LoadMapChipCsv(floorCsv, 0);
+	mapChipField_->LoadMapChipCsv(ravageCsv, 1);
 
 	// 既存のブロックWorldTransformをクリアして再生成
 	for (auto& layer : worldTransformBlocks_) {
@@ -192,7 +209,6 @@ void GameScene::Reset() {
 	// プレイヤーの位置と状態を初期化
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(0, 0);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
-	player_->SetRemainingMoves(10); // 回数をリセット
 
 	// カメラの初期化
 	cameraController_->Reset();
@@ -212,7 +228,7 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
 	// レイヤー 0:床 (WorldTransform)
-	worldTransformBlocks_.resize(1); 
+	worldTransformBlocks_.resize(1);
 	worldTransformBlocks_[0].resize(numBlockVertical);
 	for (uint32_t i = 0; i < numBlockVertical; ++i) {
 		worldTransformBlocks_[0][i].resize(numBlockHorizontal, nullptr);
@@ -244,13 +260,13 @@ void GameScene::GenerateBlocks() {
 /**
  * @brief 更新
  */
-void GameScene::Update() { 
+void GameScene::Update() {
 	ChangePhase();
 
 	fade_->Update();
 	skydome_->Update();
 	cameraController_->Update();
-	
+
 	switch (phase_) {
 	case Phase::kFadeIn:
 		if (fade_->IsFinished()) {
@@ -290,7 +306,8 @@ void GameScene::Update() {
 	for (auto& layer : worldTransformBlocks_) {
 		for (auto& line : layer) {
 			for (auto& block : line) {
-				if (block) WorldTransformUpdate(*block);
+				if (block)
+					WorldTransformUpdate(*block);
 			}
 		}
 	}
@@ -299,15 +316,15 @@ void GameScene::Update() {
 /**
  * @brief 描画
  */
-void GameScene::Draw() { 
+void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	Model::PreDraw(dxCommon->GetCommandList());
 
-	skydome_->Draw(); 
+	skydome_->Draw();
 
 	if (!player_->IsDead()) {
-		player_->Draw(); 
+		player_->Draw();
 	}
 
 	for (uint32_t layer = 0; layer < worldTransformBlocks_.size(); ++layer) {
@@ -356,8 +373,7 @@ void GameScene::CheckAllCollisions() {
 		AABB boxAABB = box->GetAABB();
 
 		if (IsCollision(playerAABB, boxAABB)) {
-				box->OnCollision();
-			
+			box->OnCollision(player_->GetMoveDirection());
 		}
 	}
 }
