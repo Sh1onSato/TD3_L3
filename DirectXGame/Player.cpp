@@ -28,7 +28,7 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	isDead_ = false;
 	isMoving_ = false;
 	moveTimer_ = 0.0f;
-	remainingMoves_ = 10;
+	remainingMoves_ = kDefaultRemainingMoves;
 	moveDirection_ = {0, 0, 1};
 }
 

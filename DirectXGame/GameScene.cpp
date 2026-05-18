@@ -105,7 +105,7 @@ void GameScene::ChangePhase() {
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition);
 		}
-		// Rキーでいつでもリセット
+		// R キーでいつでもリセット
 		else if (Input::GetInstance()->TriggerKey(DIK_R)) {
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
@@ -198,7 +198,6 @@ void GameScene::Reset() {
 	// プレイヤーの位置と状態を初期化
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(0, 0);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
-	player_->SetRemainingMoves(10); // 回数をリセット
 
 	// カメラの初期化
 	cameraController_->Reset();

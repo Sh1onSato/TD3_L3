@@ -121,6 +121,7 @@ private:
 	float moveTimer_ = 0.0f;             // 移動アニメーションタイマー
 
 	// --- 定数（調整パラメータ） ---
+	static inline const int32_t kDefaultRemainingMoves = 10; // 初期残り移動回数
 	static inline const float kMoveTime = 0.15f;          // 1マス移動にかかる時間（秒）
 	static inline const float kTimeTurn = 0.3f;           // 旋回にかかる時間
 	static inline const float kWidth = 0.8f;              // キャラクターの横幅（判定用）
