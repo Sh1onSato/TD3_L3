@@ -118,12 +118,14 @@ void StageSelectScene::Draw() {
 		// ステージポイントの 3D 座標 → スクリーン座標に変換
 		Vector3 pos3D = stageTransforms_[i].translation_;
 		pos3D.y += 1.2f; // テキストをポイントの上にずらす
-		Vector3 ndcPos = Transform(Transform(pos3D, camera_.matView), camera_.matProjection);
+		Vector3 viewPos = Transform(pos3D, camera_.matView);
+		Vector3 ndcPos = Transform(viewPos, camera_.matProjection);
 		float screenX = (ndcPos.x + 1.0f) * 0.5f * (float)WinApp::kWindowWidth;
 		float screenY = (1.0f - ndcPos.y) * 0.5f * (float)WinApp::kWindowHeight;
 
+		static const float kTextOffsetX = -30.0f; // テキストの横方向センタリング調整
 		std::string label = "Stage " + std::to_string(i + 1);
-		DebugText::GetInstance()->Print(label, screenX - 30.0f, screenY, 2.0f);
+		DebugText::GetInstance()->Print(label, screenX + kTextOffsetX, screenY, 2.0f);
 	}
 	DebugText::GetInstance()->DrawAll();
 	Sprite::PostDraw();
