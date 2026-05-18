@@ -155,7 +155,7 @@ void GameScene::ChangePhase() {
 				}
 			}
 
-			// クリアしていたら終了（タイトルへ）
+			// Escape キーによるステージセレクト復帰要求の場合は終了（ステージセレクトへ）
 			if (returnToStageSelect_) {
 				finished_ = true;
 			}
