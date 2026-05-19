@@ -60,6 +60,7 @@ private:
 	KamataEngine::Model* skydomeModel_ = nullptr;       // スカイドームのモデル
 	KamataEngine::Model* deathParticleModel_ = nullptr; // 死亡エフェクトのモデル
 	KamataEngine::Model* interfaceModel_ = nullptr;     // インターフェースのモデル
+	KamataEngine::Model* arrowModel_ = nullptr;
 
 	// --- ゲームオブジェクト ---
 	Player* player_ = nullptr;          // 自キャラ

@@ -6,7 +6,7 @@ using namespace KamataEngine;
 /**
  * @brief デストラクタ
  */
-GameScene::~GameScene() { 
+GameScene::~GameScene() {
 	delete model_;
 	delete player_;
 	delete debugCamera_;
@@ -24,9 +24,9 @@ GameScene::~GameScene() {
 		}
 	}
 	worldTransformBlocks_.clear();
-	
+
 	delete deathParticles_;
-	
+
 	delete playerModel_;
 	delete blockModel_;
 	delete skydomeModel_;
@@ -44,11 +44,11 @@ void GameScene::Initialize() {
 	// --- 1. システム・カメラの初期化 ---
 	camera_.Initialize();
 	// カメラを斜め上からの俯瞰視点に設定
-	camera_.translation_ = { 0.0f, 15.0f, -10.0f }; // 高く、手前に
-	camera_.rotation_ = { 0.8f, 0.0f, 0.0f };      // 下を向く
-	
+	camera_.translation_ = {0.0f, 15.0f, -10.0f}; // 高く、手前に
+	camera_.rotation_ = {0.8f, 0.0f, 0.0f};       // 下を向く
+
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
-	
+
 	fade_ = new Fade();
 	fade_->Initialize();
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
@@ -60,6 +60,7 @@ void GameScene::Initialize() {
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
 	interfaceModel_ = Model::CreateFromOBJ("block");
+	arrowModel_ = Model::CreateFromOBJ("block");
 
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
@@ -80,8 +81,8 @@ void GameScene::Initialize() {
 	skydome_->Initialize(skydomeModel_, &camera_);
 
 	// --- 6. カメラコントローラーの初期化 ---
-	cameraController_ = new CameraController(); 
-	cameraController_->Initialize(&camera_);    
+	cameraController_ = new CameraController();
+	cameraController_->Initialize(&camera_);
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
 
@@ -111,8 +112,7 @@ void GameScene::ChangePhase() {
 		else if (player_->GetRemainingMoves() <= 0 && Input::GetInstance()->TriggerKey(DIK_R)) {
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
-		}
-		else {
+		} else {
 			// すべての箱が壊れたかチェック (ravageBlocks)
 			bool allBroken = true;
 			int boxCount = 0;
@@ -218,7 +218,7 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
 	// レイヤー 0:床 (WorldTransform)
-	worldTransformBlocks_.resize(1); 
+	worldTransformBlocks_.resize(1);
 	worldTransformBlocks_[0].resize(numBlockVertical);
 	for (uint32_t i = 0; i < numBlockVertical; ++i) {
 		worldTransformBlocks_[0][i].resize(numBlockHorizontal, nullptr);
@@ -250,13 +250,13 @@ void GameScene::GenerateBlocks() {
 /**
  * @brief 更新
  */
-void GameScene::Update() { 
+void GameScene::Update() {
 	ChangePhase();
 
 	fade_->Update();
 	skydome_->Update();
 	cameraController_->Update();
-	
+
 	switch (phase_) {
 	case Phase::kFadeIn:
 		if (fade_->IsFinished()) {
@@ -273,7 +273,6 @@ void GameScene::Update() {
 			box->Update();
 		}
 		interface_->Update();
-
 
 		break;
 
@@ -299,7 +298,8 @@ void GameScene::Update() {
 	for (auto& layer : worldTransformBlocks_) {
 		for (auto& line : layer) {
 			for (auto& block : line) {
-				if (block) WorldTransformUpdate(*block);
+				if (block)
+					WorldTransformUpdate(*block);
 			}
 		}
 	}
@@ -308,15 +308,15 @@ void GameScene::Update() {
 /**
  * @brief 描画
  */
-void GameScene::Draw() { 
+void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	Model::PreDraw(dxCommon->GetCommandList());
 
-	skydome_->Draw(); 
+	skydome_->Draw();
 
 	if (!player_->IsDead()) {
-		player_->Draw(); 
+		player_->Draw();
 	}
 
 	for (uint32_t layer = 0; layer < worldTransformBlocks_.size(); ++layer) {
@@ -339,6 +339,18 @@ void GameScene::Draw() {
 	}
 
 	interface_->Draw(player_->GetRemainingMoves());
+
+	if (!player_->IsDead() && arrowModel_) {
+		// 戻り値をポインタの vector に変更
+		std::vector<KamataEngine::WorldTransform*> arrowTransforms = player_->GetGuideTransforms();
+
+		if (!arrowTransforms.empty()) {
+			for (const auto& transform : arrowTransforms) {
+				// transform はポインタなので、*transform にして実体を渡して描画します
+				arrowModel_->Draw(*transform, camera_);
+			}
+		}
+	}
 
 	Model::PostDraw();
 
@@ -367,8 +379,7 @@ void GameScene::CheckAllCollisions() {
 		AABB boxAABB = box->GetAABB();
 
 		if (IsCollision(playerAABB, boxAABB)) {
-				box->OnCollision();
-			
+			box->OnCollision();
 		}
 	}
 }

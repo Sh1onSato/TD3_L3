@@ -20,6 +20,10 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	// ブロックの真上に乗るように Y を調整 (ブロック高さ1.0の半分 + プレイヤー高さ0.8の半分)
 	worldTransform_.translation_ = position;
 	worldTransform_.translation_.y = 0.9f; 
+
+	for (int i = 0; i < 8; ++i) {
+		guideTransforms_[i].Initialize();
+	}
 	
 	// 初期方向を前（Z軸プラス）に向ける
 	worldTransform_.rotation_.y = 0.0f;
@@ -317,4 +321,78 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	    {-kWidth / 2.0f, 0, +kHeight / 2.0f}  // 左上
 	};
 	return center + offsetTable[static_cast<uint32_t>(corner)];
+}
+
+std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
+	std::vector<KamataEngine::WorldTransform*> activeGuides;
+
+	if (isMoving_ || remainingMoves_ <= 0)
+		return activeGuides;
+
+	auto current = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_);
+	int x = static_cast<int>(current.xIndex);
+	int z = static_cast<int>(current.yIndex);
+
+	float offsetDistance = 1.2f;
+	float arrowHeight = worldTransform_.translation_.y + 0.1f;
+
+	// マップの配列を「調べる方向（check）」と、画面上で「矢印を出す方向（disp）」を分ける
+	struct DirectionInfo {
+		int checkX;
+		int checkZ; // マップの二次元配列を調べるためのオフセット
+		float dispX;
+		float dispZ;   // 実際に画面上で矢印をズラす方向 (Vector3に掛ける用)
+		float rotateY; // 矢印の回転角度
+	};
+
+	// ★現状の「左上にいるときに 上・右上・右 が出る」というねじれを
+	// 逆算して完全に相殺（補正）する組み合わせにしています
+	DirectionInfo dirs[] = {
+	    // 【十字方向】
+	    {1,  0,  1.0f,  0.0f,  0.0f            }, // 右を調べたとき ➔ 右に0度で出す
+	    {-1, 0,  -1.0f, 0.0f,  3.1415f         }, // 左を調べたとき ➔ 左に180度で出す
+
+	    // ▼ ここが怪しい箇所（上下・あるいは軸のねじれを補正）
+	    {0,  -1, 0.0f,  1.0f,  3.1415f * 0.5f  }, // マップの下(または上)を調べたとき ➔ 画面上の「上」に90度で出す
+	    {0,  1,  0.0f,  -1.0f, -3.1415f * 0.5f }, // マップの上(または下)を調べたとき ➔ 画面上の「下」に-90度で出す
+
+	    // 【斜め方向】
+	    {1,  -1, 1.0f,  1.0f,  3.1415f * 0.25f }, // マップの特定の斜め ➔ 画面上の「右上」に45度
+	    {-1, -1, -1.0f, 1.0f,  3.1415f * 0.75f }, // マップの特定の斜め ➔ 画面上の「左上」に135度
+	    {-1, 1,  -1.0f, -1.0f, -3.1415f * 0.75f}, // マップの特定の斜め ➔ 画面上の「左下」に-135度
+	    {1,  1,  1.0f,  -1.0f, -3.1415f * 0.25f}  // マップの特定の斜め ➔ 画面上の「右下」に-45度
+	};
+
+	int arrowCount = 0;
+
+	for (int i = 0; i < 8; ++i) {
+		const auto& dir = dirs[i];
+
+		// ① マップの配列上、どのインデックスを調べるか（checkX, checkZ を使用）
+		int nextX = x + dir.checkX;
+		int nextZ = z + dir.checkZ;
+
+		if (nextX >= 0 && nextZ >= 0) {
+			auto type = mapChipField_->GetMapChipTypeByIndex(nextX, nextZ, 0);
+			if (type == MapChipType::kBlock) {
+
+				if (arrowCount >= 8)
+					break;
+
+				guideTransforms_[arrowCount].scale_ = {1.0f, 1.0f, 1.0f};
+				guideTransforms_[arrowCount].rotation_ = {0.0f, dir.rotateY, 0.0f};
+
+				// ② 【重要】画面上の見た目の位置は、dispX, dispZ を使ってプレイヤーからズラす
+				guideTransforms_[arrowCount].translation_ = worldTransform_.translation_ + Vector3(dir.dispX * offsetDistance, 0.0f, dir.dispZ * offsetDistance);
+				guideTransforms_[arrowCount].translation_.y = arrowHeight;
+
+				WorldTransformUpdate(guideTransforms_[arrowCount]);
+
+				activeGuides.push_back(&guideTransforms_[arrowCount]);
+				arrowCount++;
+			}
+		}
+	}
+
+	return activeGuides;
 }
