@@ -339,28 +339,27 @@ std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
 	// マップの配列を「調べる方向（check）」と、画面上で「矢印を出す方向（disp）」を分ける
 	struct DirectionInfo {
 		int checkX;
-		int checkZ; // マップの二次元配列を調べるためのオフセット
+		int checkZ; 
 		float dispX;
-		float dispZ;   // 実際に画面上で矢印をズラす方向 (Vector3に掛ける用)
+		float dispZ;  
 		float rotateY; // 矢印の回転角度
 	};
 
-	// ★現状の「左上にいるときに 上・右上・右 が出る」というねじれを
-	// 逆算して完全に相殺（補正）する組み合わせにしています
+	
 	DirectionInfo dirs[] = {
 	    // 【十字方向】
-	    {1,  0,  1.0f,  0.0f,  0.0f            }, // 右を調べたとき ➔ 右に0度で出す
-	    {-1, 0,  -1.0f, 0.0f,  3.1415f         }, // 左を調べたとき ➔ 左に180度で出す
+	    {1,  0,  1.0f,  0.0f,  0.0f            }, 
+	    {-1, 0,  -1.0f, 0.0f,  3.1415f         }, 
 
-	    // ▼ ここが怪しい箇所（上下・あるいは軸のねじれを補正）
-	    {0,  -1, 0.0f,  1.0f,  3.1415f * 0.5f  }, // マップの下(または上)を調べたとき ➔ 画面上の「上」に90度で出す
-	    {0,  1,  0.0f,  -1.0f, -3.1415f * 0.5f }, // マップの上(または下)を調べたとき ➔ 画面上の「下」に-90度で出す
+	
+	    {0,  -1, 0.0f,  1.0f,  3.1415f * 0.5f  },
+	    {0,  1,  0.0f,  -1.0f, -3.1415f * 0.5f }, 
 
 	    // 【斜め方向】
-	    {1,  -1, 1.0f,  1.0f,  3.1415f * 0.25f }, // マップの特定の斜め ➔ 画面上の「右上」に45度
-	    {-1, -1, -1.0f, 1.0f,  3.1415f * 0.75f }, // マップの特定の斜め ➔ 画面上の「左上」に135度
-	    {-1, 1,  -1.0f, -1.0f, -3.1415f * 0.75f}, // マップの特定の斜め ➔ 画面上の「左下」に-135度
-	    {1,  1,  1.0f,  -1.0f, -3.1415f * 0.25f}  // マップの特定の斜め ➔ 画面上の「右下」に-45度
+	    {1,  -1, 1.0f,  1.0f,  3.1415f * 0.25f },
+	    {-1, -1, -1.0f, 1.0f,  3.1415f * 0.75f },
+	    {-1, 1,  -1.0f, -1.0f, -3.1415f * 0.75f},
+	    {1,  1,  1.0f,  -1.0f, -3.1415f * 0.25f} 
 	};
 
 	int arrowCount = 0;
@@ -368,7 +367,6 @@ std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
 	for (int i = 0; i < 8; ++i) {
 		const auto& dir = dirs[i];
 
-		// ① マップの配列上、どのインデックスを調べるか（checkX, checkZ を使用）
 		int nextX = x + dir.checkX;
 		int nextZ = z + dir.checkZ;
 
@@ -382,7 +380,6 @@ std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
 				guideTransforms_[arrowCount].scale_ = {1.0f, 1.0f, 1.0f};
 				guideTransforms_[arrowCount].rotation_ = {0.0f, dir.rotateY, 0.0f};
 
-				// ② 【重要】画面上の見た目の位置は、dispX, dispZ を使ってプレイヤーからズラす
 				guideTransforms_[arrowCount].translation_ = worldTransform_.translation_ + Vector3(dir.dispX * offsetDistance, 0.0f, dir.dispZ * offsetDistance);
 				guideTransforms_[arrowCount].translation_.y = arrowHeight;
 
