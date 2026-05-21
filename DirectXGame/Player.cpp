@@ -126,54 +126,24 @@ Vector3 Player::GetSlideTargetPosition() {
 	int stepX = static_cast<int>(std::round(moveDirection_.x));
 	int stepZ = static_cast<int>(std::round(moveDirection_.z));
 
+	// 方向がない場合は現在の位置を返す
+	if (stepX == 0 && stepZ == 0) {
+		return worldTransform_.translation_;
+	}
+
 	while (true) {
+		int nextX = x + stepX;
+		int nextZ = z + stepZ;
 
-		bool moved = false;
-
-		//X方向
-		if (stepX != 0) {
-			int nextX = x + stepX;
-
-			if (nextX >= 0) {
-				auto type = mapChipField_->GetMapChipTypeByIndex(nextX, z, 0);
-				auto obstacleType = mapChipField_->GetMapChipTypeByIndex(nextX, z, 1);
-
-				if (type == MapChipType::kBlock) {
-					if (obstacleType == MapChipType::kBlock) {
-						// 障害物に当たったので壊す
-						mapChipField_->SetMapChipTypeByIndex(nextX, z, MapChipType::kBlank, 1);
-					}
-					// 障害物を壊した、あるいは元々なかったのでそのまま進む
-					x = nextX;
-					moved = true;
-				}
-			}
-		}
-
-		//Z方向
-		if (stepZ != 0) {
-			int nextZ = z + stepZ;
-
-			if (nextZ >= 0) {
-				auto type = mapChipField_->GetMapChipTypeByIndex(x, nextZ, 0);
-				auto obstacleType = mapChipField_->GetMapChipTypeByIndex(x, nextZ, 1);
-
-				if (type == MapChipType::kBlock) {
-					if (obstacleType == MapChipType::kBlock) {
-						// 障害物に当たったので壊す
-						mapChipField_->SetMapChipTypeByIndex(x, nextZ, MapChipType::kBlank, 1);
-					}
-					// 床があれば進み続ける
-					z = nextZ;
-					moved = true;
-				}
-			}
-		}
-
-		if (!moved) {
+		// 目的のマスに床があるかチェック (layer 0)
+		auto type = mapChipField_->GetMapChipTypeByIndex(nextX, nextZ, 0);
+		if (type != MapChipType::kBlock) {
 			break;
 		}
 
+		// 移動確定（障害物があっても壊して進む仕様なので継続）
+		x = nextX;
+		z = nextZ;
 	}
 
 	Vector3 pos = mapChipField_->GetMapChipPositionByIndex((uint32_t)x, (uint32_t)z);
