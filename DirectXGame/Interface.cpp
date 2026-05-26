@@ -33,6 +33,8 @@ void Interface::Update(int currentAttack) {
 
 		Transforms_[i]->rotation_.x = 0.4f;
 
+		
+		Transforms_[i]->rotation_.y += 0.03f;
 
 		WorldTransformUpdate(*Transforms_[i]);
 	}

@@ -61,8 +61,8 @@ void GameScene::Initialize() {
 	blockModel_ = Model::CreateFromOBJ("block");
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
-	interfaceModel_ = Model::CreateFromOBJ("block");
-	arrowModel_ = Model::CreateFromOBJ("player");
+	interfaceModel_ = Model::CreateFromOBJ("player");
+	arrowModel_ = Model::CreateFromOBJ("arrow");
 
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
@@ -89,7 +89,7 @@ void GameScene::Initialize() {
 	cameraController_->Reset();
 
 interface_ = new Interface();
-	interface_->Initialize(blockModel_, &camera_);
+	interface_->Initialize(interfaceModel_, &camera_);
 
 	// カメラの移動可能範囲（XZ平面に合わせて調整）
 	CameraController::Rect cameraArea = {0.0f, 100.0f, 0.0f, 20.0f};
