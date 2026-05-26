@@ -334,7 +334,7 @@ std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
 	int z = static_cast<int>(current.yIndex);
 
 	float offsetDistance = 1.2f;
-	float arrowHeight = worldTransform_.translation_.y + 0.1f;
+	float arrowHeight = worldTransform_.translation_.y + 0.6f;
 
 	// マップの配列を「調べる方向（check）」と、画面上で「矢印を出す方向（disp）」を分ける
 	struct DirectionInfo {
@@ -347,19 +347,15 @@ std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
 
 	
 	DirectionInfo dirs[] = {
-	    // 【十字方向】
-	    {1,  0,  1.0f,  0.0f,  0.0f            }, 
-	    {-1, 0,  -1.0f, 0.0f,  3.1415f         }, 
+	    {1,  0,  1.0f,  0.0f,  3.1415f * 0.5f  }, //右
+	    {-1, 0,  -1.0f, 0.0f,  -3.1415f * 0.5f }, //左
+	    {0,  -1, 0.0f,  1.0f,  0.0f            }, //上 
+	    {0,  1,  0.0f,  -1.0f, 3.1415f         }, //下 
 
-	
-	    {0,  -1, 0.0f,  1.0f,  3.1415f * 0.5f  },
-	    {0,  1,  0.0f,  -1.0f, -3.1415f * 0.5f }, 
-
-	    // 【斜め方向】
-	    {1,  -1, 1.0f,  1.0f,  3.1415f * 0.25f },
-	    {-1, -1, -1.0f, 1.0f,  3.1415f * 0.75f },
-	    {-1, 1,  -1.0f, -1.0f, -3.1415f * 0.75f},
-	    {1,  1,  1.0f,  -1.0f, -3.1415f * 0.25f} 
+	    {1,  -1, 1.0f,  1.0f,  3.1415f * 0.25f }, // 右上
+	    {-1, -1, -1.0f, 1.0f,  -3.1415f * 0.25f}, // 左上
+	    {-1, 1,  -1.0f, -1.0f, -3.1415f * 0.75f}, // 左下
+	    {1,  1,  1.0f,  -1.0f, 3.1415f * 0.75f }  // 右下
 	};
 
 	int arrowCount = 0;

@@ -3,16 +3,21 @@
 #include "Math.h"
 
 class Interface {
-
 public:
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const Vector3& position);
+	static const int kMaxAttack = 10;
 
-	void Update();
-
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera);
+	void Update(int currentAttack);
 	void Draw(int remainingMoves);
 
 private:
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Camera* camera_ = nullptr;
-	KamataEngine::WorldTransform worldTransform_;
+
+	KamataEngine::WorldTransform* Transforms_[kMaxAttack];
+
+	Vector3 cameraOffset_ = {-3.9f, -3.0f, 6.0f}; 
+
+	float targetX_ = 0.0f;
+	float targetY_ = 0.0f;
 };

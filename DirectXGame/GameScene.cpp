@@ -31,6 +31,8 @@ GameScene::~GameScene() {
 	delete blockModel_;
 	delete skydomeModel_;
 	delete deathParticleModel_;
+	delete interfaceModel_;
+	delete arrowModel_;
 
 	for (Box* box : boxes_) {
 		delete box;
@@ -60,7 +62,7 @@ void GameScene::Initialize() {
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
 	interfaceModel_ = Model::CreateFromOBJ("block");
-	arrowModel_ = Model::CreateFromOBJ("block");
+	arrowModel_ = Model::CreateFromOBJ("player");
 
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
@@ -86,8 +88,8 @@ void GameScene::Initialize() {
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
 
-	interface_ = new Interface();
-	interface_->Initialize(interfaceModel_, &camera_, {1.0f, 1.0f, 1.0f});
+interface_ = new Interface();
+	interface_->Initialize(blockModel_, &camera_);
 
 	// カメラの移動可能範囲（XZ平面に合わせて調整）
 	CameraController::Rect cameraArea = {0.0f, 100.0f, 0.0f, 20.0f};
@@ -272,7 +274,8 @@ void GameScene::Update() {
 		for (Box* box : boxes_) {
 			box->Update();
 		}
-		interface_->Update();
+
+		interface_->Update(player_->GetRemainingMoves());
 
 		break;
 
