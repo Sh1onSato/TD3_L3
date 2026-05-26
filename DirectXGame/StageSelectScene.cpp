@@ -96,9 +96,19 @@ void StageSelectScene::Update() {
 		break;
 	}
 
-	// 目標座標の取得
-	targetX_ = stageTransforms_[currentStage_].translation_.x;
-	targetY_ = stageTransforms_[currentStage_].translation_.y;
+	// ステージのスケールを更新（選択中を大きく、それ以外を小さく）
+	for (int i = 0; i < kMaxStage; i++) {
+		float targetScale = (i == currentStage_) ? 0.8f : 0.5f;
+		// スムーズに変化させる
+		stageTransforms_[i].scale_.x += (targetScale - stageTransforms_[i].scale_.x) * 0.2f;
+		stageTransforms_[i].scale_.y += (targetScale - stageTransforms_[i].scale_.y) * 0.2f;
+		stageTransforms_[i].scale_.z += (targetScale - stageTransforms_[i].scale_.z) * 0.2f;
+		WorldTransformUpdate(stageTransforms_[i]);
+	}
+
+	// 目標座標の取得（ステージの右下あたりにオフセット）
+	targetX_ = stageTransforms_[currentStage_].translation_.x + 1.2f;
+	targetY_ = stageTransforms_[currentStage_].translation_.y - 1.2f;
 
 	// なめらかな移動 (線形補間)
 	worldTransform_.translation_.x += (targetX_ - worldTransform_.translation_.x) * 0.15f;
