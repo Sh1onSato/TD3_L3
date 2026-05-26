@@ -61,6 +61,9 @@ public:
 	int32_t GetRemainingMoves() const { return remainingMoves_; }
 	void SetRemainingMoves(int32_t moves) { remainingMoves_ = moves; }
 
+	// 移動ガイド矢印のワールド行列リストを取得
+	std::vector<KamataEngine::WorldTransform*> GetGuideTransforms();
+
 private:
 	// --- 内部処理用関数 ---
 
@@ -113,6 +116,9 @@ private:
 
 	Vector3 moveDirection_ = {0, 0, 1};
 	int32_t remainingMoves_ = 10;        // 残り移動回数
+
+	// --- ガイド表示 ---
+	KamataEngine::WorldTransform guideTransforms_[8];
 
 	// --- マス移動アニメーション ---
 	bool isMoving_ = false;               // マス移動中か

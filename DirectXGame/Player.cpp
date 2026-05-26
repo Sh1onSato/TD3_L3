@@ -288,3 +288,70 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	};
 	return center + offsetTable[static_cast<uint32_t>(corner)];
 }
+
+
+std::vector<KamataEngine::WorldTransform*> Player::GetGuideTransforms() {
+	std::vector<KamataEngine::WorldTransform*> activeGuides;
+
+	if (isMoving_ || remainingMoves_ <= 0)
+		return activeGuides;
+
+	auto current = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_);
+	int x = static_cast<int>(current.xIndex);
+	int z = static_cast<int>(current.yIndex);
+
+	float offsetDistance = 1.2f;
+	float arrowHeight = worldTransform_.translation_.y + 0.6f;
+
+	// マップの配列を「調べる方向（check）」と、画面上で「矢印を出す方向（disp）」を分ける
+	struct DirectionInfo {
+		int checkX;
+		int checkZ;
+		float dispX;
+		float dispZ;
+		float rotateY; // 矢印の回転角度
+	};
+
+	DirectionInfo dirs[] = {
+	    {1,  0,  1.0f,  0.0f,  3.1415f * 0.5f  }, //  右
+	    {-1, 0,  -1.0f, 0.0f,  -3.1415f * 0.5f }, //  左
+	    {0,  -1, 0.0f,  1.0f,  0.0f            }, //  上
+	    {0,  1,  0.0f,  -1.0f, 3.1415f         }, //  下
+
+	    {1,  -1, 1.0f,  1.0f,  3.1415f * 0.25f }, // 右上
+	    {-1, -1, -1.0f, 1.0f,  -3.1415f * 0.25f}, // 左上
+	    {-1, 1,  -1.0f, -1.0f, -3.1415f * 0.75f}, // 左下
+	    {1,  1,  1.0f,  -1.0f, 3.1415f * 0.75f }  // 右下
+	};
+
+	int arrowCount = 0;
+
+	for (int i = 0; i < 8; ++i) {
+		const auto& dir = dirs[i];
+
+		int nextX = x + dir.checkX;
+		int nextZ = z + dir.checkZ;
+
+		if (nextX >= 0 && nextZ >= 0) {
+			auto type = mapChipField_->GetMapChipTypeByIndex(nextX, nextZ, 0);
+			if (type == MapChipType::kBlock) {
+
+				if (arrowCount >= 8)
+					break;
+
+				guideTransforms_[arrowCount].scale_ = {1.0f, 1.0f, 1.0f};
+				guideTransforms_[arrowCount].rotation_ = {0.0f, dir.rotateY, 0.0f};
+
+				guideTransforms_[arrowCount].translation_ = worldTransform_.translation_ + Vector3(dir.dispX * offsetDistance, 0.0f, dir.dispZ * offsetDistance);
+				guideTransforms_[arrowCount].translation_.y = arrowHeight;
+
+				WorldTransformUpdate(guideTransforms_[arrowCount]);
+
+				activeGuides.push_back(&guideTransforms_[arrowCount]);
+				arrowCount++;
+			}
+		}
+	}
+
+	return activeGuides;
+}
