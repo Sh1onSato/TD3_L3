@@ -49,9 +49,9 @@ public:
 	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
 
 private:
-	static inline const uint32_t kNumBlockVirtical = 20;
-	static inline const uint32_t kNumBlockHorizontal = 100;
-	static inline const uint32_t kNumLayers = 2;
+	static inline const uint32_t kNumBlockVirtical = 10;
+	static inline const uint32_t kNumBlockHorizontal = 10;
+	static inline const uint32_t kNumLayers = 3;
 
 	MapChipData mapChipData_[kNumLayers];
 };

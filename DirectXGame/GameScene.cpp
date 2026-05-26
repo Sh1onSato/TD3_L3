@@ -64,6 +64,7 @@ void GameScene::Initialize() {
 	mapChipField_->ResetMapChipData();
 	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
 	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/upperBlocks.csv", 2);
 	GenerateBlocks();
 
 	// --- 4. プレイヤーの生成と初期化 ---
@@ -168,6 +169,7 @@ void GameScene::Reset() {
 	mapChipField_->ResetMapChipData();
 	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
 	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/upperBlocks.csv", 2);
 
 	// 既存のブロックWorldTransformをクリアして再生成
 	for (auto& layer : worldTransformBlocks_) {
@@ -229,13 +231,15 @@ void GameScene::GenerateBlocks() {
 				worldTransformBlocks_[0][i][j] = worldTransform;
 			}
 
-			// レイヤー 1: 破壊可能なブロック (Box)
-			if (mapChipField_->GetMapChipTypeByIndex(j, i, 1) == MapChipType::kBlock) {
-				Box* newBox = new Box();
-				Vector3 position = mapChipField_->GetMapChipPositionByIndex(j, i);
-				position.y = 1.0f; // 高さを合わせる
-				newBox->Initialize(blockModel_, &camera_, position);
-				boxes_.push_back(newBox);
+			// レイヤー 1 & 2: 破壊可能なブロック (Box)
+			for (uint32_t layer = 1; layer < 3; ++layer) {
+				if (mapChipField_->GetMapChipTypeByIndex(j, i, layer) == MapChipType::kBlock) {
+					Box* newBox = new Box();
+					Vector3 position = mapChipField_->GetMapChipPositionByIndex(j, i);
+					position.y = static_cast<float>(layer); // 高さをレイヤーに合わせる
+					newBox->Initialize(blockModel_, &camera_, position, mapChipField_, j, i, layer);
+					boxes_.push_back(newBox);
+				}
 			}
 		}
 	}
@@ -342,22 +346,26 @@ void GameScene::Draw() {
  * @brief 当たり判定のチェック
  */
 void GameScene::CheckAllCollisions() {
-	// エネミー削除に伴い、現在はプレイヤーとマップの判定のみ（Playerクラス内で処理済み）
-	// 将来的にアイテム等の判定が必要になればここに追加する
-
-	AABB playerAABB = player_->GetAABB();
+	// プレイヤーの中心座標を取得
+	Vector3 playerPos = player_->GetWorldPosition();
 
 	for (Box* box : boxes_) {
-		// すでに壊れている場合はスキップ
-		if (!box->IsAlive()) {
-			continue;
-		}
+		if (!box->IsAlive()) continue;
 
-		AABB boxAABB = box->GetAABB();
+		// 地上にあるブロックのみを対象にする
+		if (box->GetLayer() != 1) continue;
 
-		if (IsCollision(playerAABB, boxAABB)) {
-				box->OnCollision();
-			
+		// 箱の中心座標を取得
+		Vector3 boxPos = mapChipField_->GetMapChipPositionByIndex(box->GetXIndex(), box->GetYIndex());
+
+		// プレイヤーと箱の距離（XZ平面の各軸）をチェック
+		float dx = std::abs(playerPos.x - boxPos.x);
+		float dz = std::abs(playerPos.z - boxPos.z);
+
+		// マスの中心から0.4以内（境界から0.1以上離れている）場合のみ破壊する
+		// 速度を落としたことで、この0.4の範囲を通り過ぎてしまう（取りこぼす）ことはなくなります
+		if (dx < 0.4f && dz < 0.4f) {
+			box->OnCollision();
 		}
 	}
 }
