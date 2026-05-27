@@ -20,6 +20,10 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	// ブロックの真上に乗るように Y を調整 (ブロック高さ1.0の半分 + プレイヤー高さ0.8の半分)
 	worldTransform_.translation_ = position;
 	worldTransform_.translation_.y = 0.9f; 
+
+	for (int i = 0; i < 8; ++i) {
+		guideTransforms_[i].Initialize();
+	}
 	
 	// 初期方向を前（Z軸プラス）に向ける
 	worldTransform_.rotation_.y = 0.0f;

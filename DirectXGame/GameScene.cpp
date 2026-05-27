@@ -62,6 +62,7 @@ void GameScene::Initialize() {
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
 	interfaceModel_ = Model::CreateFromOBJ("player");
+	arrowModel_ = Model::CreateFromOBJ("arrow");
 
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
@@ -347,7 +348,7 @@ void GameScene::Draw() {
 	interface_->Draw(player_->GetRemainingMoves());
 
 	
-	if (!player_->IsDead() && arrowModel_) {
+		if (!player_->IsDead() && arrowModel_) {
 		// 戻り値をポインタの vector に変更
 		std::vector<KamataEngine::WorldTransform*> arrowTransforms = player_->GetGuideTransforms();
 
