@@ -22,6 +22,8 @@ public:
 
 	bool IsFinished() const { return finished_; }
 
+	int GetSelectedStage() const { return currentStage_; }
+
 private:
 	// ビュープロジェクション
 	Camera camera_;

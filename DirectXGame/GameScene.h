@@ -19,7 +19,7 @@ public:
 	~GameScene();
 
 	/// @brief 初期化
-	void Initialize();
+	void Initialize(int stageIndex);
 
 	/// @brief 更新
 	void Update();
@@ -55,7 +55,8 @@ private:
 	// --- 3Dモデルデータ ---
 	KamataEngine::Model* model_ = nullptr;              // 汎用モデル
 	KamataEngine::Model* playerModel_ = nullptr;        // プレイヤーのモデル
-	KamataEngine::Model* blockModel_ = nullptr;         // ブロックのモデル
+	KamataEngine::Model* floorBlockModel_ = nullptr;    // 床ブロックのモデル
+	KamataEngine::Model* ravageBlockModel_ = nullptr;   // 壊せるブロックのモデル
 	KamataEngine::Model* skydomeModel_ = nullptr;       // スカイドームのモデル
 	KamataEngine::Model* deathParticleModel_ = nullptr; // 死亡エフェクトのモデル
 
@@ -81,4 +82,6 @@ private:
 
 	//壊す箱
 	std::vector<Box*> boxes_;
+
+	int stageIndex_ = 0;
 };

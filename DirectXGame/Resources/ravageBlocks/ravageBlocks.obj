@@ -1,6 +1,6 @@
 # Blender 3.3.1
 # www.blender.org
-mtllib block.mtl
+mtllib ravageBlocks.mtl
 o Cube
 v -0.500000 0.500000 0.500000
 v -0.500000 -0.500000 0.500000

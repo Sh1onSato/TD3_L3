@@ -47,13 +47,15 @@ void ChangeScene() {
 		if (stageSelectScene->IsFinished()) {
 			scene = Scene::kGame;
 
+			int selectedStage = stageSelectScene->GetSelectedStage();
+
 			// ステージ選択のメモリを解放
 			delete stageSelectScene;
 			stageSelectScene = nullptr;
 
 			// ゲームシーンの作成と初期化
 			gameScene = new GameScene;
-			gameScene->Initialize();
+			gameScene->Initialize(selectedStage);
 		}
 		break;
 

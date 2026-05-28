@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "Math.h"
+#include <string>
 
 using namespace KamataEngine;
 
@@ -27,7 +28,8 @@ GameScene::~GameScene() {
 	delete deathParticles_;
 	
 	delete playerModel_;
-	delete blockModel_;
+	delete floorBlockModel_;
+	delete ravageBlockModel_;
 	delete skydomeModel_;
 	delete deathParticleModel_;
 
@@ -39,7 +41,9 @@ GameScene::~GameScene() {
 /**
  * @brief 初期化
  */
-void GameScene::Initialize() {
+void GameScene::Initialize(int stageIndex) {
+	stageIndex_ = stageIndex;
+
 	// --- 1. システム・カメラの初期化 ---
 	camera_.Initialize();
 	// カメラを斜め上からの俯瞰視点に設定
@@ -55,16 +59,20 @@ void GameScene::Initialize() {
 	// --- 2. モデルデータのロード ---
 	model_ = Model::Create();
 	skydomeModel_ = Model::CreateFromOBJ("skydome", true);
-	blockModel_ = Model::CreateFromOBJ("block");
+	floorBlockModel_ = Model::CreateFromOBJ("floorBlocks");
+	ravageBlockModel_ = Model::CreateFromOBJ("ravageBlocks");
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
 
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
 	mapChipField_->ResetMapChipData();
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/upperBlocks.csv", 2);
+
+	std::string stageName = "STAGE" + std::to_string(stageIndex_ + 1);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/" + stageName + "/floorBlocks.csv", 0);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/" + stageName + "/ravageBlocks.csv", 1);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/" + stageName + "/upperBlocks.csv", 2);
+
 	GenerateBlocks();
 
 	// --- 4. プレイヤーの生成と初期化 ---
@@ -167,9 +175,11 @@ void GameScene::ChangePhase() {
 void GameScene::Reset() {
 	// マップデータの再読み込み
 	mapChipField_->ResetMapChipData();
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/floorBlocks.csv", 0);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/ravageBlocks.csv", 1);
-	mapChipField_->LoadMapChipCsv("Resources/mapCsv/upperBlocks.csv", 2);
+	
+	std::string stageName = "STAGE" + std::to_string(stageIndex_ + 1);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/" + stageName + "/floorBlocks.csv", 0);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/" + stageName + "/ravageBlocks.csv", 1);
+	mapChipField_->LoadMapChipCsv("Resources/mapCsv/" + stageName + "/upperBlocks.csv", 2);
 
 	// 既存のブロックWorldTransformをクリアして再生成
 	for (auto& layer : worldTransformBlocks_) {
@@ -237,7 +247,7 @@ void GameScene::GenerateBlocks() {
 					Box* newBox = new Box();
 					Vector3 position = mapChipField_->GetMapChipPositionByIndex(j, i);
 					position.y = static_cast<float>(layer); // 高さをレイヤーに合わせる
-					newBox->Initialize(blockModel_, &camera_, position, mapChipField_, j, i, layer);
+					newBox->Initialize(ravageBlockModel_, &camera_, position, mapChipField_, j, i, layer);
 					boxes_.push_back(newBox);
 				}
 			}
@@ -319,7 +329,7 @@ void GameScene::Draw() {
 			for (uint32_t j = 0; j < worldTransformBlocks_[layer][i].size(); ++j) {
 				WorldTransform* block = worldTransformBlocks_[layer][i][j];
 				if (block && mapChipField_->GetMapChipTypeByIndex(j, i, layer) != MapChipType::kBlank) {
-					blockModel_->Draw(*block, camera_);
+					floorBlockModel_->Draw(*block, camera_);
 				}
 			}
 		}
