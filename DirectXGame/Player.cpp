@@ -28,6 +28,7 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	isDead_ = false;
 	isMoving_ = false;
 	moveTimer_ = 0.0f;
+	slideFallsDeath_ = false;
 	remainingMoves_ = kDefaultRemainingMoves;
 	moveDirection_ = {0, 0, 1};
 }
@@ -51,6 +52,12 @@ void Player::Update() {
 			// 移動回数を減らす
 			if (remainingMoves_ > 0) {
 				remainingMoves_--;
+			}
+
+			// 穴の縁で止まった場合は落下死
+			if (slideFallsDeath_) {
+				isDead_ = true;
+				slideFallsDeath_ = false;
 			}
 		} else {
 			// EaseInOut で滑らかに補間
@@ -125,6 +132,8 @@ void Player::InputMove() {
 
 Vector3 Player::GetSlideTargetPosition() {
 
+	slideFallsDeath_ = false;
+
 	auto current = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_);
 
 	int x = static_cast<int>(current.xIndex);
@@ -181,6 +190,27 @@ Vector3 Player::GetSlideTargetPosition() {
 			break;
 		}
 
+	}
+
+	// スライドが止まった原因を確認：マップ内の穴なら落下死
+	int mapW = static_cast<int>(mapChipField_->GetNumBlockHorizontal());
+	int mapH = static_cast<int>(mapChipField_->GetNumBlockVirtical());
+
+	if (stepX != 0) {
+		int nextX = x + stepX;
+		if (nextX >= 0 && nextX < mapW) {
+			if (mapChipField_->GetMapChipTypeByIndex(nextX, z, 0) == MapChipType::kBlank) {
+				slideFallsDeath_ = true;
+			}
+		}
+	}
+	if (stepZ != 0) {
+		int nextZ = z + stepZ;
+		if (nextZ >= 0 && nextZ < mapH) {
+			if (mapChipField_->GetMapChipTypeByIndex(x, nextZ, 0) == MapChipType::kBlank) {
+				slideFallsDeath_ = true;
+			}
+		}
 	}
 
 	Vector3 pos = mapChipField_->GetMapChipPositionByIndex((uint32_t)x, (uint32_t)z);

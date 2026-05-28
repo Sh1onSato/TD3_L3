@@ -119,6 +119,7 @@ private:
 	Vector3 moveStartPosition_ = {};      // 移動開始位置
 	Vector3 moveTargetPosition_ = {};     // 移動目標位置（マスの中心）
 	float moveTimer_ = 0.0f;             // 移動アニメーションタイマー
+	bool slideFallsDeath_ = false;        // スライド先が穴で死亡するか
 
 	// --- 定数（調整パラメータ） ---
 	static inline const int32_t kDefaultRemainingMoves = 10; // 初期残り移動回数
