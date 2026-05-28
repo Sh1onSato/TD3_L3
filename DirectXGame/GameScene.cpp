@@ -15,6 +15,7 @@ GameScene::~GameScene() {
 	delete mapChipField_;
 	delete cameraController_;
 	delete fade_;
+	delete interface_;
 
 	for (auto& layer : worldTransformBlocks_) {
 		for (auto& line : layer) {
@@ -32,6 +33,8 @@ GameScene::~GameScene() {
 	delete ravageBlockModel_;
 	delete skydomeModel_;
 	delete deathParticleModel_;
+	delete interfaceModel_;
+	delete arrowModel_;
 
 	for (Box* box : boxes_) {
 		delete box;
@@ -63,6 +66,8 @@ void GameScene::Initialize(int stageIndex) {
 	ravageBlockModel_ = Model::CreateFromOBJ("ravageBlocks");
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
+	interfaceModel_ = Model::CreateFromOBJ("player");
+	arrowModel_ = Model::CreateFromOBJ("arrow");
 
 	// --- 3. マップの生成 ---
 	mapChipField_ = new MapChipField();
@@ -91,6 +96,10 @@ void GameScene::Initialize(int stageIndex) {
 	cameraController_->Initialize(&camera_);    
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
+
+	// --- 7. インターフェースの初期化 ---
+	interface_ = new Interface();
+	interface_->Initialize(interfaceModel_, &camera_);
 	// カメラの移動可能範囲（XZ平面に合わせて調整）
 	CameraController::Rect cameraArea = {0.0f, 100.0f, 0.0f, 20.0f};
 	cameraController_->SetMovableArea(cameraArea);
@@ -280,6 +289,9 @@ void GameScene::Update() {
 		for (Box* box : boxes_) {
 			box->Update();
 		}
+
+		interface_->Update(player_->GetRemainingMoves());
+
 		break;
 
 	case Phase::kDeath:
@@ -343,6 +355,21 @@ void GameScene::Draw() {
 		box->Draw();
 	}
 
+	interface_->Draw(player_->GetRemainingMoves());
+
+	
+		if (!player_->IsDead() && arrowModel_) {
+		// 戻り値をポインタの vector に変更
+		std::vector<KamataEngine::WorldTransform*> arrowTransforms = player_->GetGuideTransforms();
+
+		if (!arrowTransforms.empty()) {
+			for (const auto& transform : arrowTransforms) {
+				// transform はポインタなので、*transform にして実体を渡して描画します
+				arrowModel_->Draw(*transform, camera_);
+			}
+		}
+	}
+
 	Model::PostDraw();
 
 	// フェードの描画
@@ -379,3 +406,4 @@ void GameScene::CheckAllCollisions() {
 		}
 	}
 }
+
