@@ -358,6 +358,7 @@ void GameScene::Draw() {
 	interface_->Draw(player_->GetRemainingMoves());
 
 	
+	/*
 		if (!player_->IsDead() && arrowModel_) {
 		// 戻り値をポインタの vector に変更
 		std::vector<KamataEngine::WorldTransform*> arrowTransforms = player_->GetGuideTransforms();
@@ -369,6 +370,7 @@ void GameScene::Draw() {
 			}
 		}
 	}
+	*/
 
 	Model::PostDraw();
 

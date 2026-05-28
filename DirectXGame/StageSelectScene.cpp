@@ -9,8 +9,8 @@ StageSelectScene::~StageSelectScene() {
 
 void StageSelectScene::Initialize() {
 	camera_.Initialize();
-	// カメラをさらに近づける
-	camera_.translation_ = { 0.0f, 0.0f, -12.0f };
+	// カメラを近づける
+	camera_.translation_ = { 0.0f, 0.0f, -17.0f };
 	camera_.rotation_ = { 0.0f, 0.0f, 0.0f };
 	
 	model_ = Model::CreateFromOBJ("player");
@@ -118,6 +118,7 @@ void StageSelectScene::Update() {
 	worldTransform_.rotation_.y += 0.03f;
 	
 	WorldTransformUpdate(worldTransform_);
+	camera_.UpdateMatrix();
 	camera_.TransferMatrix();
 }
 
