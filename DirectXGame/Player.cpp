@@ -63,7 +63,7 @@ void Player::Update() {
  * @brief 描画
  */
 void Player::Draw() { 
-	model_->Draw(worldTransform_, *camera_, textureHandle_); 
+	model_->Draw(worldTransform_, *camera_); 
 }
 
 /**i
