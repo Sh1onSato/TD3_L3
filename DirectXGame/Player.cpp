@@ -75,21 +75,34 @@ void Player::InputMove() {
 
 	int32_t dx = 0, dz = 0;
 
-	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
-		dx += 1;
-	}
-
-	if (Input::GetInstance()->PushKey(DIK_LEFT)) {
-
-		dx -= 1;
-	}
-	if (Input::GetInstance()->PushKey(DIK_UP)) {
-
-		dz -= 1;
-	}
-
-	if (Input::GetInstance()->PushKey(DIK_DOWN)) {
-		dz += 1;
+	if (playerIndex_ == 0) {
+		// プレイヤー0（シオン）: 矢印キー + SPACE
+		if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+			dx += 1;
+		}
+		if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+			dx -= 1;
+		}
+		if (Input::GetInstance()->PushKey(DIK_UP)) {
+			dz -= 1;
+		}
+		if (Input::GetInstance()->PushKey(DIK_DOWN)) {
+			dz += 1;
+		}
+	} else {
+		// プレイヤー1（ゆか）: WASDキー + Z
+		if (Input::GetInstance()->PushKey(DIK_D)) {
+			dx += 1;
+		}
+		if (Input::GetInstance()->PushKey(DIK_A)) {
+			dx -= 1;
+		}
+		if (Input::GetInstance()->PushKey(DIK_W)) {
+			dz -= 1;
+		}
+		if (Input::GetInstance()->PushKey(DIK_S)) {
+			dz += 1;
+		}
 	}
 
 	//斜めの方向処理
@@ -101,8 +114,12 @@ void Player::InputMove() {
 		worldTransform_.rotation_.y = std::atan2(moveDirection_.x, -moveDirection_.z);
 	}
 
-	  // SPACEでスライド開始
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	// スライド開始キー（P0: SPACE、P1: Z）
+	bool slideKey = (playerIndex_ == 0)
+	    ? Input::GetInstance()->TriggerKey(DIK_SPACE)
+	    : Input::GetInstance()->TriggerKey(DIK_Z);
+
+	if (slideKey) {
 		// 移動回数が残っていないなら移動不可
 		if (remainingMoves_ <= 0) return;
 

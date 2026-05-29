@@ -34,6 +34,9 @@ public:
 
 	/// @brief 初期化
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const Vector3& position);
+
+	/// @brief プレイヤーインデックスを設定（0:シオン/矢印キー+SPACE, 1:ゆか/WASD+Z）
+	void SetPlayerIndex(int index) { playerIndex_ = index; }
 	
 	/// @brief 更新
 	void Update();
@@ -114,6 +117,7 @@ private:
 	bool isDead_ = false;            // 死亡フラグ
 	MapChipField* mapChipField_ = nullptr; // マップデータへの参照
 
+	int playerIndex_ = 0;            // プレイヤー番号（0:シオン, 1:ゆか）
 	Vector3 moveDirection_ = {0, 0, 1};
 	int32_t remainingMoves_ = 10;        // 残り移動回数
 

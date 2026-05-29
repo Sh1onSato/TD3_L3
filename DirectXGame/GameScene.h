@@ -64,10 +64,12 @@ private:
 	KamataEngine::Model* arrowModel_ = nullptr;
 
 	// --- ゲームオブジェクト ---
-	Player* player_ = nullptr;          // 自キャラ
+	Player* player_ = nullptr;          // 自キャラ（シオン）
+	Player* player2_ = nullptr;         // 2Pキャラ（ゆか）
 	Skydome* skydome_ = nullptr;        // 背景の空
 	MapChipField* mapChipField_ = nullptr; // マップデータ
-	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理
+	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理（シオン）
+	DeathParticles* deathParticles2_ = nullptr; // 死亡エフェクト管理（ゆか）
 	Interface* interface_ = nullptr;
 
 	// --- カメラ・描画関連 ---

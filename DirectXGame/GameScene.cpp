@@ -10,6 +10,7 @@ using namespace KamataEngine;
 GameScene::~GameScene() { 
 	delete model_;
 	delete player_;
+	delete player2_;
 	delete debugCamera_;
 	delete skydome_;
 	delete mapChipField_;
@@ -27,6 +28,7 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 	
 	delete deathParticles_;
+	delete deathParticles2_;
 	
 	delete playerModel_;
 	delete floorBlockModel_;
@@ -87,6 +89,13 @@ void GameScene::Initialize(int stageIndex) {
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(0, 0);
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 
+	// ゆか（プレイヤー2）の生成と初期化 - 対角のマスに配置
+	player2_ = new Player();
+	player2_->SetPlayerIndex(1);
+	player2_->SetMapChipField(mapChipField_);
+	Vector3 player2Position = mapChipField_->GetMapChipPositionByIndex(9, 9);
+	player2_->Initialize(playerModel_, &camera_, player2Position);
+
 	// --- 5. 背景（スカイドーム）の初期化 ---
 	skydome_ = new Skydome();
 	skydome_->Initialize(skydomeModel_, &camera_);
@@ -113,14 +122,20 @@ void GameScene::Initialize(int stageIndex) {
 void GameScene::ChangePhase() {
 	switch (phase_) {
 	case Phase::kPlay:
-		if (player_->IsDead()) {
+		// どちらかのプレイヤーが死んだら死亡演出へ
+		if (player_->IsDead() && !deathParticles_) {
 			phase_ = Phase::kDeath;
 			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition);
+		} else if (player2_->IsDead() && !deathParticles2_) {
+			phase_ = Phase::kDeath;
+			const Vector3& deathParticlesPosition2 = player2_->GetWorldPosition();
+			deathParticles2_ = new DeathParticles;
+			deathParticles2_->Initialize(deathParticleModel_, &camera_, deathParticlesPosition2);
 		}
-		// 移動回数が0のとき、Rキーでリセット
-		else if (player_->GetRemainingMoves() <= 0 && Input::GetInstance()->TriggerKey(DIK_R)) {
+		// 両プレイヤーの移動回数が0のとき、Rキーでリセット
+		else if (player_->GetRemainingMoves() <= 0 && player2_->GetRemainingMoves() <= 0 && Input::GetInstance()->TriggerKey(DIK_R)) {
 			phase_ = Phase::kFadeOut;
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 		}
@@ -136,16 +151,20 @@ void GameScene::ChangePhase() {
 				}
 			}
 
-			if (boxCount > 0 && allBroken && !player_->IsMoving()) {
+			if (boxCount > 0 && allBroken && !player_->IsMoving() && !player2_->IsMoving()) {
 				phase_ = Phase::kFadeOut;
 				fade_->Start(Fade::Status::FadeOut, 1.0f);
 			}
 		}
 		break;
 	case Phase::kDeath:
-		if (deathParticles_ && deathParticles_->IsFinished()) {
-			phase_ = Phase::kFadeOut;
-			fade_->Start(Fade::Status::FadeOut, 1.0f);
+		{
+			bool p1Done = !deathParticles_ || deathParticles_->IsFinished();
+			bool p2Done = !deathParticles2_ || deathParticles2_->IsFinished();
+			if (p1Done && p2Done) {
+				phase_ = Phase::kFadeOut;
+				fade_->Start(Fade::Status::FadeOut, 1.0f);
+			}
 		}
 		break;
 	case Phase::kFadeOut:
@@ -165,8 +184,9 @@ void GameScene::ChangePhase() {
 			if (boxCount > 0 && allBroken) {
 				finished_ = true;
 			}
-			// プレイヤーが死亡しているか、リセットボタンが押された場合
-			else if (player_->IsDead() || player_->GetRemainingMoves() <= 0) {
+			// どちらかのプレイヤーが死亡、または両プレイヤーの手数が尽きた場合はリセット
+			else if (player_->IsDead() || player2_->IsDead() ||
+			         (player_->GetRemainingMoves() <= 0 && player2_->GetRemainingMoves() <= 0)) {
 				Reset();
 				phase_ = Phase::kFadeIn;
 				fade_->Start(Fade::Status::FadeIn, 1.0f);
@@ -215,6 +235,11 @@ void GameScene::Reset() {
 	player_->Initialize(playerModel_, &camera_, playerPosition);
 	player_->SetRemainingMoves(10); // 回数をリセット
 
+	// ゆか（プレイヤー2）の位置と状態を初期化
+	Vector3 player2Position = mapChipField_->GetMapChipPositionByIndex(9, 9);
+	player2_->Initialize(playerModel_, &camera_, player2Position);
+	player2_->SetRemainingMoves(10);
+
 	// カメラの初期化
 	cameraController_->Reset();
 
@@ -222,6 +247,10 @@ void GameScene::Reset() {
 	if (deathParticles_) {
 		delete deathParticles_;
 		deathParticles_ = nullptr;
+	}
+	if (deathParticles2_) {
+		delete deathParticles2_;
+		deathParticles2_ = nullptr;
 	}
 }
 
@@ -284,6 +313,7 @@ void GameScene::Update() {
 
 	case Phase::kPlay:
 		player_->Update();
+		player2_->Update();
 		CheckAllCollisions();
 
 		for (Box* box : boxes_) {
@@ -297,6 +327,9 @@ void GameScene::Update() {
 	case Phase::kDeath:
 		if (deathParticles_) {
 			deathParticles_->Update();
+		}
+		if (deathParticles2_) {
+			deathParticles2_->Update();
 		}
 		break;
 
@@ -335,6 +368,9 @@ void GameScene::Draw() {
 	if (!player_->IsDead()) {
 		player_->Draw(); 
 	}
+	if (!player2_->IsDead()) {
+		player2_->Draw();
+	}
 
 	for (uint32_t layer = 0; layer < worldTransformBlocks_.size(); ++layer) {
 		for (uint32_t i = 0; i < worldTransformBlocks_[layer].size(); ++i) {
@@ -349,6 +385,9 @@ void GameScene::Draw() {
 
 	if (player_->IsDead() && deathParticles_) {
 		deathParticles_->Draw();
+	}
+	if (player2_->IsDead() && deathParticles2_) {
+		deathParticles2_->Draw();
 	}
 
 	for (Box* box : boxes_) {
@@ -385,24 +424,35 @@ void GameScene::Draw() {
  * @brief 当たり判定のチェック
  */
 void GameScene::CheckAllCollisions() {
-	// プレイヤーの中心座標を取得
+	// プレイヤー1（シオン）の当たり判定
 	Vector3 playerPos = player_->GetWorldPosition();
 
 	for (Box* box : boxes_) {
 		if (!box->IsAlive()) continue;
-
-		// 地上にあるブロックのみを対象にする
 		if (box->GetLayer() != 1) continue;
 
-		// 箱の中心座標を取得
 		Vector3 boxPos = mapChipField_->GetMapChipPositionByIndex(box->GetXIndex(), box->GetYIndex());
 
-		// プレイヤーと箱の距離（XZ平面の各軸）をチェック
 		float dx = std::abs(playerPos.x - boxPos.x);
 		float dz = std::abs(playerPos.z - boxPos.z);
 
-		// マスの中心から0.4以内（境界から0.1以上離れている）場合のみ破壊する
-		// 速度を落としたことで、この0.4の範囲を通り過ぎてしまう（取りこぼす）ことはなくなります
+		if (dx < 0.4f && dz < 0.4f) {
+			box->OnCollision();
+		}
+	}
+
+	// プレイヤー2（ゆか）の当たり判定
+	Vector3 player2Pos = player2_->GetWorldPosition();
+
+	for (Box* box : boxes_) {
+		if (!box->IsAlive()) continue;
+		if (box->GetLayer() != 1) continue;
+
+		Vector3 boxPos = mapChipField_->GetMapChipPositionByIndex(box->GetXIndex(), box->GetYIndex());
+
+		float dx = std::abs(player2Pos.x - boxPos.x);
+		float dz = std::abs(player2Pos.z - boxPos.z);
+
 		if (dx < 0.4f && dz < 0.4f) {
 			box->OnCollision();
 		}
