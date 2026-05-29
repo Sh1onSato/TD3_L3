@@ -18,17 +18,17 @@ void StageSelectScene::Initialize() {
 	
 	worldTransform_.Initialize();
 	
-	// ステージポイントの配置 (4x2のグリッド)
+	// ステージポイントの配置 (5x2のグリッド)
 	float intervalX = 5.0f;
 	float intervalY = 4.0f;
-	float offsetX = (float)(4 - 1) * intervalX / 2.0f;
+	float offsetX = (float)(5 - 1) * intervalX / 2.0f;
 	float offsetY = (float)(2 - 1) * intervalY / 2.0f;
 
 	for (int i = 0; i < kMaxStage; i++) {
 		stageTransforms_[i].Initialize();
 		// 行と列の計算
-		int row = i / 4; // 0:上段, 1:下段
-		int col = i % 4; // 0~3:左から右
+		int row = i / 5; // 0:上段, 1:下段
+		int col = i % 5; // 0~4:左から右
 		
 		stageTransforms_[i].translation_ = { 
 			(float)col * intervalX - offsetX, 
@@ -60,24 +60,24 @@ void StageSelectScene::Update() {
 	case Phase::kMain:
 		// 十字キー左右で列移動
 		if (Input::GetInstance()->TriggerKey(DIK_LEFT)) {
-			if (currentStage_ % 4 > 0) {
+			if (currentStage_ % 5 > 0) {
 				currentStage_--;
 			}
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_RIGHT)) {
-			if (currentStage_ % 4 < 3) {
+			if (currentStage_ % 5 < 4) {
 				currentStage_++;
 			}
 		}
 		// 十字キー上下で行移動
 		if (Input::GetInstance()->TriggerKey(DIK_UP)) {
-			if (currentStage_ >= 4) {
-				currentStage_ -= 4;
+			if (currentStage_ >= 5) {
+				currentStage_ -= 5;
 			}
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
-			if (currentStage_ < 4) {
-				currentStage_ += 4;
+			if (currentStage_ < 5) {
+				currentStage_ += 5;
 			}
 		}
 
