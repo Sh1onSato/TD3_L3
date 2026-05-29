@@ -90,7 +90,7 @@ void Player::InputMove() {
 			dz += 1;
 		}
 	} else {
-		// プレイヤー1（ゆか）: WASDキー + Z
+		// プレイヤー2（ゆか）: WASDキー + Z
 		if (Input::GetInstance()->PushKey(DIK_D)) {
 			dx += 1;
 		}

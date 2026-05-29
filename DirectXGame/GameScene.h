@@ -34,6 +34,9 @@ public:
 	/// @brief すべての当たり判定をチェック
 	void CheckAllCollisions();
 
+	/// @brief 指定プレイヤー座標と箱の当たり判定を処理
+	void CheckPlayerBoxCollisions(const KamataEngine::Vector3& playerPos);
+
 	/// @brief ゲームをリセット（最初からやり直し）
 	void Reset();
 

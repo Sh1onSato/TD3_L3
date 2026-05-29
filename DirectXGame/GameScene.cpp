@@ -424,9 +424,14 @@ void GameScene::Draw() {
  * @brief 当たり判定のチェック
  */
 void GameScene::CheckAllCollisions() {
-	// プレイヤー1（シオン）の当たり判定
-	Vector3 playerPos = player_->GetWorldPosition();
+	CheckPlayerBoxCollisions(player_->GetWorldPosition());
+	CheckPlayerBoxCollisions(player2_->GetWorldPosition());
+}
 
+/**
+ * @brief 指定プレイヤー座標と箱の当たり判定を処理
+ */
+void GameScene::CheckPlayerBoxCollisions(const Vector3& playerPos) {
 	for (Box* box : boxes_) {
 		if (!box->IsAlive()) continue;
 		if (box->GetLayer() != 1) continue;
@@ -435,23 +440,6 @@ void GameScene::CheckAllCollisions() {
 
 		float dx = std::abs(playerPos.x - boxPos.x);
 		float dz = std::abs(playerPos.z - boxPos.z);
-
-		if (dx < 0.4f && dz < 0.4f) {
-			box->OnCollision();
-		}
-	}
-
-	// プレイヤー2（ゆか）の当たり判定
-	Vector3 player2Pos = player2_->GetWorldPosition();
-
-	for (Box* box : boxes_) {
-		if (!box->IsAlive()) continue;
-		if (box->GetLayer() != 1) continue;
-
-		Vector3 boxPos = mapChipField_->GetMapChipPositionByIndex(box->GetXIndex(), box->GetYIndex());
-
-		float dx = std::abs(player2Pos.x - boxPos.x);
-		float dz = std::abs(player2Pos.z - boxPos.z);
 
 		if (dx < 0.4f && dz < 0.4f) {
 			box->OnCollision();
