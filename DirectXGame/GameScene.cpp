@@ -17,6 +17,7 @@ GameScene::~GameScene() {
 	delete cameraController_;
 	delete fade_;
 	delete interface_;
+	delete interface2_;
 
 	for (auto& layer : worldTransformBlocks_) {
 		for (auto& line : layer) {
@@ -109,6 +110,11 @@ void GameScene::Initialize(int stageIndex) {
 	// --- 7. インターフェースの初期化 ---
 	interface_ = new Interface();
 	interface_->Initialize(interfaceModel_, &camera_);
+
+	// プレイヤー2用インターフェース（右側に表示）
+	interface2_ = new Interface();
+	interface2_->Initialize(interfaceModel_, &camera_);
+	interface2_->SetCameraOffset({0.6f, -3.0f, 6.0f});
 	// カメラの移動可能範囲（XZ平面に合わせて調整）
 	CameraController::Rect cameraArea = {0.0f, 100.0f, 0.0f, 20.0f};
 	cameraController_->SetMovableArea(cameraArea);
@@ -321,6 +327,7 @@ void GameScene::Update() {
 		}
 
 		interface_->Update(player_->GetRemainingMoves());
+		interface2_->Update(player2_->GetRemainingMoves());
 
 		break;
 
@@ -395,6 +402,7 @@ void GameScene::Draw() {
 	}
 
 	interface_->Draw(player_->GetRemainingMoves());
+	interface2_->Draw(player2_->GetRemainingMoves());
 
 	
 	/*

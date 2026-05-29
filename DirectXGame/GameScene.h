@@ -74,6 +74,7 @@ private:
 	DeathParticles* deathParticles_ = nullptr; // 死亡エフェクト管理（シオン）
 	DeathParticles* deathParticles2_ = nullptr; // 死亡エフェクト管理（ゆか）
 	Interface* interface_ = nullptr;
+	Interface* interface2_ = nullptr;
 
 	// --- カメラ・描画関連 ---
 	KamataEngine::Camera camera_;               // メインカメラ

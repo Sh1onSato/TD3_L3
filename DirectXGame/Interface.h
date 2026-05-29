@@ -11,6 +11,9 @@ public:
 	void Update(int currentAttack);
 	void Draw(int remainingMoves);
 
+	/// @brief カメラからのオフセット位置を設定
+	void SetCameraOffset(const Vector3& offset) { cameraOffset_ = offset; }
+
 private:
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Camera* camera_ = nullptr;
