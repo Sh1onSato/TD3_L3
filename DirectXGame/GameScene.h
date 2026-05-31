@@ -80,6 +80,10 @@ private:
 	// --- システム関連 ---
 	Fade* fade_ = nullptr;      // 画面フェード演出
 	bool finished_ = false;    // シーン終了フラグ
+
+	//--bgm--
+	uint32_t gameBgmHandle_ = 0;      // 音声データ
+	uint32_t gameBgmVoiceHandle_ = 0; 
 	
 	// ブロックの座標情報などのリスト (レイヤー, Y, X)
 	std::vector<std::vector<std::vector<KamataEngine::WorldTransform*>>> worldTransformBlocks_;

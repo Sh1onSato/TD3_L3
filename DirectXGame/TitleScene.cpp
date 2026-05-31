@@ -10,6 +10,10 @@ TitleScene::~TitleScene() {
 
 void TitleScene::Initialize() {
 
+	textureHandle_ = TextureManager::Load("title/title.png"); 
+	background_ = Sprite::Create(textureHandle_, {0.0f, 0.0f});
+	background_->SetSize({1280.0f, 720.0f});
+
 	modelTitle_ = Model::CreateFromOBJ("titleFont", true);
 	modelPlayer_ = Model::CreateFromOBJ("player");
 
@@ -85,10 +89,11 @@ void TitleScene::Draw() {
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
 
-	Model::PreDraw(commandList);
+Sprite::PreDraw(commandList);
 
-	modelTitle_->Draw(worldTransformTitle_, camera_);
-	modelPlayer_->Draw(worldTransformPlayer_, camera_);
+	if (background_) {
+		background_->Draw(); // 🔴 1枚絵を貼るだけ
+	}
 
 	Model::PostDraw();
 

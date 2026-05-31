@@ -8,6 +8,7 @@ using namespace KamataEngine;
  * @brief デストラクタ
  */
 GameScene::~GameScene() { 
+	Audio::GetInstance()->StopWave(gameBgmVoiceHandle_);
 	delete model_;
 	delete player_;
 	delete debugCamera_;
@@ -62,7 +63,7 @@ void GameScene::Initialize(int stageIndex) {
 	// --- 2. モデルデータのロード ---
 	model_ = Model::Create();
 	skydomeModel_ = Model::CreateFromOBJ("skydome", true);
-	floorBlockModel_ = Model::CreateFromOBJ("floorBlocks");
+	floorBlockModel_ = Model::CreateFromOBJ("block");
 	ravageBlockModel_ = Model::CreateFromOBJ("ravageBlocks");
 	playerModel_ = Model::CreateFromOBJ("player");
 	deathParticleModel_ = Model::CreateFromOBJ("deathParticle");
@@ -100,6 +101,13 @@ void GameScene::Initialize(int stageIndex) {
 	// --- 7. インターフェースの初期化 ---
 	interface_ = new Interface();
 	interface_->Initialize(interfaceModel_, &camera_);
+
+	gameBgmHandle_ = Audio::GetInstance()->LoadWave("bgm/GAMEBGM.mp3");
+
+	gameBgmVoiceHandle_ = Audio::GetInstance()->PlayWave(gameBgmHandle_, true);
+
+	Audio::GetInstance()->SetVolume(gameBgmVoiceHandle_, 0.2f);
+	
 	// カメラの移動可能範囲（XZ平面に合わせて調整）
 	CameraController::Rect cameraArea = {0.0f, 100.0f, 0.0f, 20.0f};
 	cameraController_->SetMovableArea(cameraArea);

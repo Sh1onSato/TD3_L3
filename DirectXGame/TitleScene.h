@@ -29,6 +29,9 @@ private:
 	WorldTransform worldTransformTitle_;
 	WorldTransform worldTransformPlayer_;
 
+	uint32_t textureHandle_ = 0;
+	KamataEngine::Sprite* background_ = nullptr;
+
 	Model* modelPlayer_ = nullptr;
 	Model* modelTitle_ = nullptr;
 
